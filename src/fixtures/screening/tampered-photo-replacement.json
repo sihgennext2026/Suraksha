@@ -1,0 +1,349 @@
+{
+  "schema_version": "1.0",
+  "case_id": "FIXTURE-TAMPERED_PHOTO_REPLACEMENT",
+  "document_type": "national_id",
+  "ocr": {
+    "schema_version": "1.0",
+    "case_id": "FIXTURE-TAMPERED_PHOTO_REPLACEMENT",
+    "module": "ocr",
+    "status": "SUCCESS",
+    "model_version": "phase1-ppocrv5-unet-1.0.0",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "result": {
+      "document_type": "national_id",
+      "fields": [
+        {
+          "key": "surname",
+          "value": "LIMBU",
+          "source": "label_same_line",
+          "confidence": null,
+          "region": null
+        },
+        {
+          "key": "given_names",
+          "value": "DEEPAK",
+          "source": "label_same_line",
+          "confidence": null,
+          "region": null
+        },
+        {
+          "key": "id_number",
+          "value": "NID884120",
+          "source": "label_same_line",
+          "confidence": null,
+          "region": null
+        },
+        {
+          "key": "date_of_birth",
+          "value": "1993-02-05",
+          "source": "label_same_line",
+          "confidence": null,
+          "region": null
+        },
+        {
+          "key": "date_of_expiry",
+          "value": "2028-05-29",
+          "source": "label_same_line",
+          "confidence": null,
+          "region": null
+        }
+      ],
+      "mrz": {
+        "present": false,
+        "format": "NONE",
+        "lines": [],
+        "check_digits": [],
+        "checksum_valid": null,
+        "confidence": null
+      },
+      "detection": {
+        "detected": true,
+        "confidence": 0.98,
+        "box": [
+          0.062,
+          0.118,
+          0.876,
+          0.694
+        ],
+        "correction_mode": "segmentation_quad_warp",
+        "orientation_corrected": true
+      },
+      "overall_confidence": 0.9,
+      "language": "latin"
+    },
+    "errors": [],
+    "duration_ms": null
+  },
+  "validation": {
+    "schema_version": "1.0",
+    "case_id": "FIXTURE-TAMPERED_PHOTO_REPLACEMENT",
+    "module": "validation",
+    "status": "SUCCESS",
+    "model_version": "backend-validation-1.0.0",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "result": {
+      "decision": "VALID",
+      "checks": [
+        {
+          "rule_id": "required_surname",
+          "status": "PASS",
+          "message": "Required field 'surname' is present",
+          "observed": null,
+          "expectation": null,
+          "fields": []
+        },
+        {
+          "rule_id": "required_id_number",
+          "status": "PASS",
+          "message": "Required field 'id_number' is present",
+          "observed": null,
+          "expectation": null,
+          "fields": []
+        },
+        {
+          "rule_id": "date_of_birth_format",
+          "status": "PASS",
+          "message": "Date of birth is well formed",
+          "observed": null,
+          "expectation": null,
+          "fields": []
+        },
+        {
+          "rule_id": "expiry_after_issue",
+          "status": "NOT_APPLICABLE",
+          "message": "No issue date on this document",
+          "observed": null,
+          "expectation": null,
+          "fields": []
+        }
+      ],
+      "summary": {
+        "passed": 3,
+        "failed": 0,
+        "review": 0,
+        "not_applicable": 1,
+        "not_available": 0
+      },
+      "rule_version": "backend-validation-1.0.0"
+    },
+    "errors": [],
+    "duration_ms": null
+  },
+  "face_verification": {
+    "schema_version": "1.0",
+    "case_id": "FIXTURE-TAMPERED_PHOTO_REPLACEMENT",
+    "module": "face_verification",
+    "status": "SUCCESS",
+    "model_version": "arcface-r50-buffalo_m-w600k",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "result": {
+      "similarity": 0.58,
+      "decision": "MATCH",
+      "thresholds": {
+        "match": 0.3,
+        "review": 0.14
+      },
+      "quality": {
+        "document_face": {
+          "acceptable": true,
+          "score": null,
+          "metrics": {
+            "face_width_px": 186.0,
+            "face_height_px": 214.0,
+            "brightness": 118.0,
+            "blur_score": 38.0,
+            "yaw_proxy": 0.06,
+            "roll_deg": 1.4
+          },
+          "checks": {
+            "face_size_ok": true,
+            "brightness_ok": true,
+            "blur_ok": true,
+            "pose_ok": true
+          }
+        },
+        "live_face": {
+          "acceptable": true,
+          "score": null,
+          "metrics": {
+            "face_width_px": 186.0,
+            "face_height_px": 214.0,
+            "brightness": 134.0,
+            "blur_score": 61.0,
+            "yaw_proxy": 0.03,
+            "roll_deg": 1.4
+          },
+          "checks": {
+            "face_size_ok": true,
+            "brightness_ok": true,
+            "blur_ok": true,
+            "pose_ok": true
+          }
+        }
+      },
+      "embedding_dim": 512
+    },
+    "errors": [],
+    "duration_ms": null
+  },
+  "document_forensics": {
+    "schema_version": "1.0",
+    "case_id": "FIXTURE-TAMPERED_PHOTO_REPLACEMENT",
+    "module": "document_forensics",
+    "status": "SUCCESS",
+    "model_version": "mock-dinov2-v0",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "result": {
+      "tampered": true,
+      "tamper_score": 0.91,
+      "manipulation_type": "PHOTO_REPLACEMENT",
+      "type_score": 0.87,
+      "suspicious_regions": [
+        {
+          "bbox": [
+            0.08,
+            0.28,
+            0.27,
+            0.45
+          ],
+          "score": 0.94,
+          "note": "The security overlay is discontinuous at the portrait boundary."
+        },
+        {
+          "bbox": [
+            0.09,
+            0.24,
+            0.29,
+            0.06
+          ],
+          "score": 0.61,
+          "note": "Lamination thickness changes along the upper portrait edge."
+        }
+      ]
+    },
+    "errors": [],
+    "duration_ms": null
+  },
+  "anomaly": {
+    "schema_version": "1.0",
+    "case_id": "FIXTURE-TAMPERED_PHOTO_REPLACEMENT",
+    "module": "anomaly",
+    "status": "NOT_AVAILABLE",
+    "model_version": "not-available",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "result": null,
+    "errors": [
+      {
+        "code": "ANOMALY_NOT_IMPLEMENTED",
+        "message": "Anomaly detection (PatchCore) is not implemented. This document has not been compared against a reference distribution.",
+        "retryable": false
+      }
+    ],
+    "duration_ms": null
+  },
+  "risk": {
+    "schema_version": "1.0",
+    "case_id": "FIXTURE-TAMPERED_PHOTO_REPLACEMENT",
+    "module": "risk",
+    "status": "SUCCESS",
+    "model_version": "evidence-fusion-1.0.0",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "result": {
+      "risk_score": 0.3792,
+      "risk_level": "HIGH",
+      "contributors": [
+        {
+          "source": "document_forensics",
+          "signal": "TAMPERED",
+          "impact": "Potential tampering detected (tamper score 0.91, type photo replacement); 2 suspicious regions identified.",
+          "severity": "HIGH",
+          "weight": 0.4,
+          "counted": true
+        },
+        {
+          "source": "face_verification",
+          "signal": "MATCH",
+          "impact": "Cosine similarity 0.580 is at or above the match boundary 0.30.",
+          "severity": "NONE",
+          "weight": 0.28,
+          "counted": true
+        },
+        {
+          "source": "validation",
+          "signal": "VALID",
+          "impact": "Every applicable rule passed (3 passed, 0 failed, 0 inconclusive).",
+          "severity": "NONE",
+          "weight": 0.22,
+          "counted": true
+        },
+        {
+          "source": "ocr",
+          "signal": "OK",
+          "impact": "Fields were extracted cleanly and the machine-readable zone, where present, is self-consistent.",
+          "severity": "NONE",
+          "weight": 0.06,
+          "counted": true
+        },
+        {
+          "source": "anomaly",
+          "signal": "NOT_AVAILABLE",
+          "impact": "Anomaly detection (PatchCore) is not implemented. This document has not been compared against a reference distribution.",
+          "severity": "NONE",
+          "weight": null,
+          "counted": false
+        }
+      ],
+      "evidence_coverage": 0.96,
+      "engine_version": "evidence-fusion-1.0.0",
+      "config_version": "1.0.0",
+      "bands": {
+        "review_at_or_above": 0.3,
+        "high_at_or_above": 0.65
+      },
+      "escalations": [
+        "Tampering was detected, which is escalated regardless of the other findings."
+      ],
+      "narrative": "Fused risk score 0.38 across 96% of the available evidence places this screening in the HIGH band. Leading findings: Potential tampering detected (tamper score 0.91, type photo replacement); 2 suspicious regions identified. Not scored because no result was produced: anomaly analysis. Absent evidence has not been counted for or against this document. Escalated: Tampering was detected, which is escalated regardless of the other findings. This is decision support. The operational decision rests with the officer."
+    },
+    "errors": [],
+    "duration_ms": null
+  },
+  "evidence": [
+    {
+      "module": "ocr",
+      "status": "SUCCESS",
+      "headline": "Field extraction",
+      "detail": "5 fields read · confidence 0.90",
+      "severity": "NONE"
+    },
+    {
+      "module": "validation",
+      "status": "SUCCESS",
+      "headline": "Rule validation",
+      "detail": "3 passed, 0 failed, 0 inconclusive",
+      "severity": "NONE"
+    },
+    {
+      "module": "face_verification",
+      "status": "SUCCESS",
+      "headline": "Face verification",
+      "detail": "Match · similarity 0.580",
+      "severity": "NONE"
+    },
+    {
+      "module": "document_forensics",
+      "status": "SUCCESS",
+      "headline": "Document forensics",
+      "detail": "Potential tampering · score 0.91",
+      "severity": "HIGH"
+    },
+    {
+      "module": "anomaly",
+      "status": "NOT_AVAILABLE",
+      "headline": "Anomaly analysis",
+      "detail": "Anomaly detection (PatchCore) is not implemented. This document has not been compared against a reference distribution.",
+      "severity": "NONE"
+    }
+  ],
+  "generated_at": "2026-01-01T00:00:00.000Z"
+}

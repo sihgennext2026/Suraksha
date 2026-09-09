@@ -39,3 +39,11 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Local export/verification output
+.expo-export-check/
+dist/
+coverage/
+
+# Android signing identity (keystore + passwords)
+/credentials/

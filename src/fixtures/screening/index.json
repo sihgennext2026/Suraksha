@@ -1,0 +1,62 @@
+[
+  {
+    "id": "genuine-passport",
+    "document_type": "passport",
+    "risk_level": "LOW",
+    "risk_score": 0.0167
+  },
+  {
+    "id": "face-review",
+    "document_type": "passport",
+    "risk_level": "REVIEW",
+    "risk_score": 0.2656
+  },
+  {
+    "id": "face-no-match",
+    "document_type": "passport",
+    "risk_level": "REVIEW",
+    "risk_score": 0.3083
+  },
+  {
+    "id": "face-failed",
+    "document_type": "passport",
+    "risk_level": "REVIEW",
+    "risk_score": 0.0235
+  },
+  {
+    "id": "tampered-photo-replacement",
+    "document_type": "national_id",
+    "risk_level": "HIGH",
+    "risk_score": 0.3792
+  },
+  {
+    "id": "tampered-text-and-invalid",
+    "document_type": "passport",
+    "risk_level": "HIGH",
+    "risk_score": 0.8458
+  },
+  {
+    "id": "tampered-no-region",
+    "document_type": "passport",
+    "risk_level": "HIGH",
+    "risk_score": 0.2958
+  },
+  {
+    "id": "forensics-unavailable",
+    "document_type": "passport",
+    "risk_level": "REVIEW",
+    "risk_score": 0.0
+  },
+  {
+    "id": "unsupported-document-type",
+    "document_type": "travel_authorization",
+    "risk_level": "REVIEW",
+    "risk_score": 0.0235
+  },
+  {
+    "id": "all-modules-down",
+    "document_type": "passport",
+    "risk_level": "REVIEW",
+    "risk_score": 0.0
+  }
+]

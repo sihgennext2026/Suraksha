@@ -1,0 +1,47 @@
+{
+  "cli": {
+    "version": ">= 5.0.0",
+    "appVersionSource": "local"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "preview": {
+      "//": [
+        "The profile to use for a shareable test build.",
+        "buildType 'apk' matters: the default for Android is an .aab, which the",
+        "Play Store accepts but a phone cannot install directly. An APK can be",
+        "downloaded and side-loaded, which is what field testing needs.",
+        "",
+        "The JavaScript bundle is embedded, so the app runs with no Metro server",
+        "and no network - which is the point of an offline-first screening tool."
+      ],
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {
+      "//": [
+        "Play Store submission. Produces an .aab and requires a real upload",
+        "keystore. Not used for field testing.",
+        "",
+        "TODO(production): before any operational release this profile needs a",
+        "managed signing key, and the screening models bundled or provisioned by",
+        "the device management service."
+      ],
+      "autoIncrement": true,
+      "android": {
+        "buildType": "app-bundle"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

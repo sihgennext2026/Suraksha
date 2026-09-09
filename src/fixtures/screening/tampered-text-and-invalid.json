@@ -1,0 +1,394 @@
+{
+  "schema_version": "1.0",
+  "case_id": "FIXTURE-TAMPERED_TEXT_AND_INVALID",
+  "document_type": "passport",
+  "ocr": {
+    "schema_version": "1.0",
+    "case_id": "FIXTURE-TAMPERED_TEXT_AND_INVALID",
+    "module": "ocr",
+    "status": "SUCCESS",
+    "model_version": "phase1-ppocrv5-unet-1.0.0",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "result": {
+      "document_type": "passport",
+      "fields": [
+        {
+          "key": "surname",
+          "value": "RAHMAN",
+          "source": "mrz",
+          "confidence": null,
+          "region": null
+        },
+        {
+          "key": "given_names",
+          "value": "IMRAN",
+          "source": "mrz",
+          "confidence": null,
+          "region": null
+        },
+        {
+          "key": "passport_number",
+          "value": "B0473913",
+          "source": "mrz",
+          "confidence": null,
+          "region": null
+        },
+        {
+          "key": "nationality",
+          "value": "BGD",
+          "source": "mrz",
+          "confidence": null,
+          "region": null
+        },
+        {
+          "key": "date_of_birth",
+          "value": "1991-06-22",
+          "source": "mrz",
+          "confidence": null,
+          "region": null
+        },
+        {
+          "key": "sex",
+          "value": "M",
+          "source": "mrz",
+          "confidence": null,
+          "region": null
+        },
+        {
+          "key": "date_of_issue",
+          "value": "2019-02-11",
+          "source": "mrz",
+          "confidence": null,
+          "region": null
+        },
+        {
+          "key": "date_of_expiry",
+          "value": "2029-02-10",
+          "source": "mrz",
+          "confidence": null,
+          "region": null
+        },
+        {
+          "key": "place_of_birth",
+          "value": "SYLHET",
+          "source": "label_same_line",
+          "confidence": null,
+          "region": null
+        }
+      ],
+      "mrz": {
+        "present": true,
+        "format": "TD3",
+        "lines": [
+          "P<INDSHARMA<<ANIL<KUMAR<<<<<<<<<<<<<<<<<<<<<",
+          "P48217369IND8903142M3107013UP1989031409<<<02"
+        ],
+        "check_digits": [],
+        "checksum_valid": null,
+        "confidence": 0.98
+      },
+      "detection": {
+        "detected": true,
+        "confidence": 0.98,
+        "box": [
+          0.062,
+          0.118,
+          0.876,
+          0.694
+        ],
+        "correction_mode": "segmentation_quad_warp",
+        "orientation_corrected": true
+      },
+      "overall_confidence": 0.81,
+      "language": "latin"
+    },
+    "errors": [],
+    "duration_ms": null
+  },
+  "validation": {
+    "schema_version": "1.0",
+    "case_id": "FIXTURE-TAMPERED_TEXT_AND_INVALID",
+    "module": "validation",
+    "status": "SUCCESS",
+    "model_version": "backend-validation-1.0.0",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "result": {
+      "decision": "INVALID",
+      "checks": [
+        {
+          "rule_id": "required_surname",
+          "status": "PASS",
+          "message": "Required field 'surname' is present",
+          "observed": null,
+          "expectation": null,
+          "fields": []
+        },
+        {
+          "rule_id": "required_given_names",
+          "status": "PASS",
+          "message": "Required field 'given_names' is present",
+          "observed": null,
+          "expectation": null,
+          "fields": []
+        },
+        {
+          "rule_id": "required_passport_number",
+          "status": "PASS",
+          "message": "Required field 'passport_number' is present",
+          "observed": null,
+          "expectation": null,
+          "fields": []
+        },
+        {
+          "rule_id": "passport_number_format",
+          "status": "PASS",
+          "message": "Document number matches the expected format",
+          "observed": null,
+          "expectation": null,
+          "fields": []
+        },
+        {
+          "rule_id": "mrz_checksum",
+          "status": "FAIL",
+          "message": "Document number check digit: read 9, computed 4",
+          "observed": null,
+          "expectation": null,
+          "fields": []
+        },
+        {
+          "rule_id": "mrz_consistency",
+          "status": "FAIL",
+          "message": "Printed document number B0473913 does not match the zone value B0473918",
+          "observed": null,
+          "expectation": null,
+          "fields": []
+        },
+        {
+          "rule_id": "dob_reasonable",
+          "status": "PASS",
+          "message": "Date of birth yields a plausible age",
+          "observed": null,
+          "expectation": null,
+          "fields": []
+        }
+      ],
+      "summary": {
+        "passed": 5,
+        "failed": 2,
+        "review": 0,
+        "not_applicable": 0,
+        "not_available": 0
+      },
+      "rule_version": "backend-validation-1.0.0"
+    },
+    "errors": [],
+    "duration_ms": null
+  },
+  "face_verification": {
+    "schema_version": "1.0",
+    "case_id": "FIXTURE-TAMPERED_TEXT_AND_INVALID",
+    "module": "face_verification",
+    "status": "SUCCESS",
+    "model_version": "arcface-r50-buffalo_m-w600k",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "result": {
+      "similarity": 0.11,
+      "decision": "NO_MATCH",
+      "thresholds": {
+        "match": 0.3,
+        "review": 0.14
+      },
+      "quality": {
+        "document_face": {
+          "acceptable": true,
+          "score": null,
+          "metrics": {
+            "face_width_px": 186.0,
+            "face_height_px": 214.0,
+            "brightness": 118.0,
+            "blur_score": 38.0,
+            "yaw_proxy": 0.06,
+            "roll_deg": 1.4
+          },
+          "checks": {
+            "face_size_ok": true,
+            "brightness_ok": true,
+            "blur_ok": true,
+            "pose_ok": true
+          }
+        },
+        "live_face": {
+          "acceptable": true,
+          "score": null,
+          "metrics": {
+            "face_width_px": 186.0,
+            "face_height_px": 214.0,
+            "brightness": 134.0,
+            "blur_score": 61.0,
+            "yaw_proxy": 0.03,
+            "roll_deg": 1.4
+          },
+          "checks": {
+            "face_size_ok": true,
+            "brightness_ok": true,
+            "blur_ok": true,
+            "pose_ok": true
+          }
+        }
+      },
+      "embedding_dim": 512
+    },
+    "errors": [],
+    "duration_ms": null
+  },
+  "document_forensics": {
+    "schema_version": "1.0",
+    "case_id": "FIXTURE-TAMPERED_TEXT_AND_INVALID",
+    "module": "document_forensics",
+    "status": "SUCCESS",
+    "model_version": "mock-dinov2-v0",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "result": {
+      "tampered": true,
+      "tamper_score": 0.78,
+      "manipulation_type": "TEXT_MANIPULATION",
+      "type_score": 0.74,
+      "suspicious_regions": [
+        {
+          "bbox": [
+            0.44,
+            0.22,
+            0.3,
+            0.09
+          ],
+          "score": 0.81,
+          "note": "Character spacing in the document number field is irregular compared with the fields adjacent to it."
+        }
+      ]
+    },
+    "errors": [],
+    "duration_ms": null
+  },
+  "anomaly": {
+    "schema_version": "1.0",
+    "case_id": "FIXTURE-TAMPERED_TEXT_AND_INVALID",
+    "module": "anomaly",
+    "status": "NOT_AVAILABLE",
+    "model_version": "not-available",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "result": null,
+    "errors": [
+      {
+        "code": "ANOMALY_NOT_IMPLEMENTED",
+        "message": "Anomaly detection (PatchCore) is not implemented. This document has not been compared against a reference distribution.",
+        "retryable": false
+      }
+    ],
+    "duration_ms": null
+  },
+  "risk": {
+    "schema_version": "1.0",
+    "case_id": "FIXTURE-TAMPERED_TEXT_AND_INVALID",
+    "module": "risk",
+    "status": "SUCCESS",
+    "model_version": "evidence-fusion-1.0.0",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "result": {
+      "risk_score": 0.8458,
+      "risk_level": "HIGH",
+      "contributors": [
+        {
+          "source": "document_forensics",
+          "signal": "TAMPERED",
+          "impact": "Potential tampering detected (tamper score 0.78, type text manipulation); 1 suspicious region identified.",
+          "severity": "HIGH",
+          "weight": 0.4,
+          "counted": true
+        },
+        {
+          "source": "face_verification",
+          "signal": "NO_MATCH",
+          "impact": "Cosine similarity 0.110 is below the no-match boundary 0.14. The subject does not match the document portrait.",
+          "severity": "HIGH",
+          "weight": 0.28,
+          "counted": true
+        },
+        {
+          "source": "validation",
+          "signal": "INVALID",
+          "impact": "Deterministic rule checking found 2 failed rule(s). A rule failure is evidence for an officer to weigh, not a finding that the document is false.",
+          "severity": "HIGH",
+          "weight": 0.22,
+          "counted": true
+        },
+        {
+          "source": "ocr",
+          "signal": "OK",
+          "impact": "Fields were extracted cleanly and the machine-readable zone, where present, is self-consistent.",
+          "severity": "NONE",
+          "weight": 0.06,
+          "counted": true
+        },
+        {
+          "source": "anomaly",
+          "signal": "NOT_AVAILABLE",
+          "impact": "Anomaly detection (PatchCore) is not implemented. This document has not been compared against a reference distribution.",
+          "severity": "NONE",
+          "weight": null,
+          "counted": false
+        }
+      ],
+      "evidence_coverage": 0.96,
+      "engine_version": "evidence-fusion-1.0.0",
+      "config_version": "1.0.0",
+      "bands": {
+        "review_at_or_above": 0.3,
+        "high_at_or_above": 0.65
+      },
+      "escalations": [
+        "Tampering was detected, which is escalated regardless of the other findings."
+      ],
+      "narrative": "Fused risk score 0.85 across 96% of the available evidence places this screening in the HIGH band. Leading findings: Cosine similarity 0.110 is below the no-match boundary 0.14. The subject does not match the document portrait.; Deterministic rule checking found 2 failed rule(s). A rule failure is evidence for an officer to weigh, not a finding that the document is false. Not scored because no result was produced: anomaly analysis. Absent evidence has not been counted for or against this document. Escalated: Tampering was detected, which is escalated regardless of the other findings. This is decision support. The operational decision rests with the officer."
+    },
+    "errors": [],
+    "duration_ms": null
+  },
+  "evidence": [
+    {
+      "module": "ocr",
+      "status": "SUCCESS",
+      "headline": "Field extraction",
+      "detail": "9 fields read · confidence 0.81",
+      "severity": "NONE"
+    },
+    {
+      "module": "validation",
+      "status": "SUCCESS",
+      "headline": "Rule validation",
+      "detail": "5 passed, 2 failed, 0 inconclusive",
+      "severity": "HIGH"
+    },
+    {
+      "module": "face_verification",
+      "status": "SUCCESS",
+      "headline": "Face verification",
+      "detail": "No match · similarity 0.110",
+      "severity": "HIGH"
+    },
+    {
+      "module": "document_forensics",
+      "status": "SUCCESS",
+      "headline": "Document forensics",
+      "detail": "Potential tampering · score 0.78",
+      "severity": "HIGH"
+    },
+    {
+      "module": "anomaly",
+      "status": "NOT_AVAILABLE",
+      "headline": "Anomaly analysis",
+      "detail": "Anomaly detection (PatchCore) is not implemented. This document has not been compared against a reference distribution.",
+      "severity": "NONE"
+    }
+  ],
+  "generated_at": "2026-01-01T00:00:00.000Z"
+}

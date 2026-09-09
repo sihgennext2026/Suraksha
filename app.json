@@ -1,25 +1,66 @@
 {
   "expo": {
-    "name": "SIH",
-    "slug": "SIH",
+    "name": "SSB Suraksha",
+    "slug": "ssb-suraksha",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "scheme": "ssbsuraksha",
     "userInterfaceStyle": "light",
+    "backgroundColor": "#0B1017",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "in.gov.ssb.suraksha",
+      "infoPlist": {
+        "NSCameraUsageDescription": "SSB Suraksha uses the camera to capture identity documents and subject photographs during a screening.",
+        "NSPhotoLibraryUsageDescription": "SSB Suraksha can import a previously captured document image for screening.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
+      "package": "in.gov.ssb.suraksha",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#0B1017",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.ACCESS_NETWORK_STATE"
+      ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      "expo-secure-store",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0B1017",
+          "dark": {
+            "backgroundColor": "#0B1017"
+          },
+          "resizeMode": "contain",
+          "imageWidth": 160
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "SSB Suraksha uses the camera to capture identity documents and subject photographs during a screening.",
+          "recordAudioAndroid": false
+        }
+      ],
+      "./plugins/withReleaseSigning"
+    ],
+    "experiments": {
+      "typedRoutes": false
     }
   }
 }

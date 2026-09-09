@@ -1,0 +1,351 @@
+{
+  "schema_version": "1.0",
+  "case_id": "FIXTURE-FACE_FAILED",
+  "document_type": "passport",
+  "ocr": {
+    "schema_version": "1.0",
+    "case_id": "FIXTURE-FACE_FAILED",
+    "module": "ocr",
+    "status": "SUCCESS",
+    "model_version": "phase1-ppocrv5-unet-1.0.0",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "result": {
+      "document_type": "passport",
+      "fields": [
+        {
+          "key": "surname",
+          "value": "SHARMA",
+          "source": "mrz",
+          "confidence": null,
+          "region": null
+        },
+        {
+          "key": "given_names",
+          "value": "ANIL KUMAR",
+          "source": "mrz",
+          "confidence": null,
+          "region": null
+        },
+        {
+          "key": "passport_number",
+          "value": "P4821736",
+          "source": "mrz",
+          "confidence": null,
+          "region": null
+        },
+        {
+          "key": "nationality",
+          "value": "IND",
+          "source": "mrz",
+          "confidence": null,
+          "region": null
+        },
+        {
+          "key": "date_of_birth",
+          "value": "1989-03-14",
+          "source": "mrz",
+          "confidence": null,
+          "region": null
+        },
+        {
+          "key": "sex",
+          "value": "M",
+          "source": "mrz",
+          "confidence": null,
+          "region": null
+        },
+        {
+          "key": "date_of_issue",
+          "value": "2021-07-02",
+          "source": "mrz",
+          "confidence": null,
+          "region": null
+        },
+        {
+          "key": "date_of_expiry",
+          "value": "2031-07-01",
+          "source": "mrz",
+          "confidence": null,
+          "region": null
+        },
+        {
+          "key": "place_of_birth",
+          "value": "LUCKNOW",
+          "source": "label_same_line",
+          "confidence": null,
+          "region": null
+        }
+      ],
+      "mrz": {
+        "present": true,
+        "format": "TD3",
+        "lines": [
+          "P<INDSHARMA<<ANIL<KUMAR<<<<<<<<<<<<<<<<<<<<<",
+          "P48217369IND8903142M3107013UP1989031409<<<02"
+        ],
+        "check_digits": [],
+        "checksum_valid": null,
+        "confidence": 0.98
+      },
+      "detection": {
+        "detected": true,
+        "confidence": 0.98,
+        "box": [
+          0.062,
+          0.118,
+          0.876,
+          0.694
+        ],
+        "correction_mode": "segmentation_quad_warp",
+        "orientation_corrected": true
+      },
+      "overall_confidence": 0.97,
+      "language": "latin"
+    },
+    "errors": [],
+    "duration_ms": null
+  },
+  "validation": {
+    "schema_version": "1.0",
+    "case_id": "FIXTURE-FACE_FAILED",
+    "module": "validation",
+    "status": "SUCCESS",
+    "model_version": "backend-validation-1.0.0",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "result": {
+      "decision": "VALID",
+      "checks": [
+        {
+          "rule_id": "required_surname",
+          "status": "PASS",
+          "message": "Required field 'surname' is present",
+          "observed": null,
+          "expectation": null,
+          "fields": []
+        },
+        {
+          "rule_id": "required_given_names",
+          "status": "PASS",
+          "message": "Required field 'given_names' is present",
+          "observed": null,
+          "expectation": null,
+          "fields": []
+        },
+        {
+          "rule_id": "required_passport_number",
+          "status": "PASS",
+          "message": "Required field 'passport_number' is present",
+          "observed": null,
+          "expectation": null,
+          "fields": []
+        },
+        {
+          "rule_id": "passport_number_format",
+          "status": "PASS",
+          "message": "Document number matches the expected format",
+          "observed": null,
+          "expectation": null,
+          "fields": []
+        },
+        {
+          "rule_id": "date_of_birth_format",
+          "status": "PASS",
+          "message": "Date of birth is a well-formed date",
+          "observed": null,
+          "expectation": null,
+          "fields": []
+        },
+        {
+          "rule_id": "expiry_after_issue",
+          "status": "PASS",
+          "message": "Date of issue precedes date of expiry",
+          "observed": null,
+          "expectation": null,
+          "fields": []
+        },
+        {
+          "rule_id": "dob_reasonable",
+          "status": "PASS",
+          "message": "Date of birth yields a plausible age",
+          "observed": null,
+          "expectation": null,
+          "fields": []
+        },
+        {
+          "rule_id": "mrz_consistency",
+          "status": "PASS",
+          "message": "Printed fields agree with the machine-readable zone",
+          "observed": null,
+          "expectation": null,
+          "fields": []
+        }
+      ],
+      "summary": {
+        "passed": 8,
+        "failed": 0,
+        "review": 0,
+        "not_applicable": 0,
+        "not_available": 0
+      },
+      "rule_version": "backend-validation-1.0.0"
+    },
+    "errors": [],
+    "duration_ms": null
+  },
+  "face_verification": {
+    "schema_version": "1.0",
+    "case_id": "FIXTURE-FACE_FAILED",
+    "module": "face_verification",
+    "status": "FAILED",
+    "model_version": "arcface-r50-buffalo_m-w600k",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "result": null,
+    "errors": [
+      {
+        "code": "NO_FACE_IN_SUBJECT_CAPTURE",
+        "message": "No face could be located in the subject photograph, so no comparison was made.",
+        "retryable": true
+      }
+    ],
+    "duration_ms": null
+  },
+  "document_forensics": {
+    "schema_version": "1.0",
+    "case_id": "FIXTURE-FACE_FAILED",
+    "module": "document_forensics",
+    "status": "SUCCESS",
+    "model_version": "mock-dinov2-v0",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "result": {
+      "tampered": false,
+      "tamper_score": 0.04,
+      "manipulation_type": "NONE",
+      "type_score": null,
+      "suspicious_regions": []
+    },
+    "errors": [],
+    "duration_ms": null
+  },
+  "anomaly": {
+    "schema_version": "1.0",
+    "case_id": "FIXTURE-FACE_FAILED",
+    "module": "anomaly",
+    "status": "NOT_AVAILABLE",
+    "model_version": "not-available",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "result": null,
+    "errors": [
+      {
+        "code": "ANOMALY_NOT_IMPLEMENTED",
+        "message": "Anomaly detection (PatchCore) is not implemented. This document has not been compared against a reference distribution.",
+        "retryable": false
+      }
+    ],
+    "duration_ms": null
+  },
+  "risk": {
+    "schema_version": "1.0",
+    "case_id": "FIXTURE-FACE_FAILED",
+    "module": "risk",
+    "status": "SUCCESS",
+    "model_version": "evidence-fusion-1.0.0",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "result": {
+      "risk_score": 0.0235,
+      "risk_level": "REVIEW",
+      "contributors": [
+        {
+          "source": "document_forensics",
+          "signal": "NO_TAMPERING_DETECTED",
+          "impact": "No tampering indicators were found (tamper score 0.04).",
+          "severity": "NONE",
+          "weight": 0.4,
+          "counted": true
+        },
+        {
+          "source": "validation",
+          "signal": "VALID",
+          "impact": "Every applicable rule passed (8 passed, 0 failed, 0 inconclusive).",
+          "severity": "NONE",
+          "weight": 0.22,
+          "counted": true
+        },
+        {
+          "source": "ocr",
+          "signal": "OK",
+          "impact": "Fields were extracted cleanly and the machine-readable zone, where present, is self-consistent.",
+          "severity": "NONE",
+          "weight": 0.06,
+          "counted": true
+        },
+        {
+          "source": "face_verification",
+          "signal": "FAILED",
+          "impact": "No face could be located in the subject photograph, so no comparison was made.",
+          "severity": "NONE",
+          "weight": null,
+          "counted": false
+        },
+        {
+          "source": "anomaly",
+          "signal": "NOT_AVAILABLE",
+          "impact": "Anomaly detection (PatchCore) is not implemented. This document has not been compared against a reference distribution.",
+          "severity": "NONE",
+          "weight": null,
+          "counted": false
+        }
+      ],
+      "evidence_coverage": 0.68,
+      "engine_version": "evidence-fusion-1.0.0",
+      "config_version": "1.0.0",
+      "bands": {
+        "review_at_or_above": 0.3,
+        "high_at_or_above": 0.65
+      },
+      "escalations": [
+        "Only 68% of the evidence was available, which is not enough to support a low-risk assessment."
+      ],
+      "narrative": "Fused risk score 0.02 across 68% of the available evidence places this screening in the REVIEW band. Leading findings: No tampering indicators were found (tamper score 0.04). Not scored because no result was produced: face verification, anomaly analysis. Absent evidence has not been counted for or against this document. Escalated: Only 68% of the evidence was available, which is not enough to support a low-risk assessment. This is decision support. The operational decision rests with the officer."
+    },
+    "errors": [],
+    "duration_ms": null
+  },
+  "evidence": [
+    {
+      "module": "ocr",
+      "status": "SUCCESS",
+      "headline": "Field extraction",
+      "detail": "9 fields read · confidence 0.97",
+      "severity": "NONE"
+    },
+    {
+      "module": "validation",
+      "status": "SUCCESS",
+      "headline": "Rule validation",
+      "detail": "8 passed, 0 failed, 0 inconclusive",
+      "severity": "NONE"
+    },
+    {
+      "module": "face_verification",
+      "status": "FAILED",
+      "headline": "Face verification",
+      "detail": "No face could be located in the subject photograph, so no comparison was made.",
+      "severity": "NONE"
+    },
+    {
+      "module": "document_forensics",
+      "status": "SUCCESS",
+      "headline": "Document forensics",
+      "detail": "No tampering detected · score 0.04",
+      "severity": "NONE"
+    },
+    {
+      "module": "anomaly",
+      "status": "NOT_AVAILABLE",
+      "headline": "Anomaly analysis",
+      "detail": "Anomaly detection (PatchCore) is not implemented. This document has not been compared against a reference distribution.",
+      "severity": "NONE"
+    }
+  ],
+  "generated_at": "2026-01-01T00:00:00.000Z"
+}

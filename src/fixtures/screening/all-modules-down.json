@@ -1,0 +1,195 @@
+{
+  "schema_version": "1.0",
+  "case_id": "FIXTURE-ALL_MODULES_DOWN",
+  "document_type": "passport",
+  "ocr": {
+    "schema_version": "1.0",
+    "case_id": "FIXTURE-ALL_MODULES_DOWN",
+    "module": "ocr",
+    "status": "FAILED",
+    "model_version": "phase1-ppocrv5-unet-1.0.0",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "result": null,
+    "errors": [
+      {
+        "code": "OCR_UNAVAILABLE",
+        "message": "The extraction service is unavailable.",
+        "retryable": true
+      }
+    ],
+    "duration_ms": null
+  },
+  "validation": {
+    "schema_version": "1.0",
+    "case_id": "FIXTURE-ALL_MODULES_DOWN",
+    "module": "validation",
+    "status": "NOT_AVAILABLE",
+    "model_version": "not-available",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "result": null,
+    "errors": [
+      {
+        "code": "NO_EXTRACTION",
+        "message": "No extracted fields were available to validate.",
+        "retryable": false
+      }
+    ],
+    "duration_ms": null
+  },
+  "face_verification": {
+    "schema_version": "1.0",
+    "case_id": "FIXTURE-ALL_MODULES_DOWN",
+    "module": "face_verification",
+    "status": "FAILED",
+    "model_version": "arcface-r50-buffalo_m-w600k",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "result": null,
+    "errors": [
+      {
+        "code": "FACE_UNAVAILABLE",
+        "message": "The face comparison service is unavailable.",
+        "retryable": true
+      }
+    ],
+    "duration_ms": null
+  },
+  "document_forensics": {
+    "schema_version": "1.0",
+    "case_id": "FIXTURE-ALL_MODULES_DOWN",
+    "module": "document_forensics",
+    "status": "FAILED",
+    "model_version": "mock-dinov2-v0",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "result": null,
+    "errors": [
+      {
+        "code": "FORENSICS_UNAVAILABLE",
+        "message": "Forensic analysis could not complete.",
+        "retryable": true
+      }
+    ],
+    "duration_ms": null
+  },
+  "anomaly": {
+    "schema_version": "1.0",
+    "case_id": "FIXTURE-ALL_MODULES_DOWN",
+    "module": "anomaly",
+    "status": "NOT_AVAILABLE",
+    "model_version": "not-available",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "result": null,
+    "errors": [
+      {
+        "code": "ANOMALY_NOT_IMPLEMENTED",
+        "message": "Anomaly detection (PatchCore) is not implemented. This document has not been compared against a reference distribution.",
+        "retryable": false
+      }
+    ],
+    "duration_ms": null
+  },
+  "risk": {
+    "schema_version": "1.0",
+    "case_id": "FIXTURE-ALL_MODULES_DOWN",
+    "module": "risk",
+    "status": "SUCCESS",
+    "model_version": "evidence-fusion-1.0.0",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "result": {
+      "risk_score": 0.0,
+      "risk_level": "REVIEW",
+      "contributors": [
+        {
+          "source": "document_forensics",
+          "signal": "FAILED",
+          "impact": "Forensic analysis could not complete.",
+          "severity": "NONE",
+          "weight": null,
+          "counted": false
+        },
+        {
+          "source": "face_verification",
+          "signal": "FAILED",
+          "impact": "The face comparison service is unavailable.",
+          "severity": "NONE",
+          "weight": null,
+          "counted": false
+        },
+        {
+          "source": "validation",
+          "signal": "NOT_AVAILABLE",
+          "impact": "No extracted fields were available to validate.",
+          "severity": "NONE",
+          "weight": null,
+          "counted": false
+        },
+        {
+          "source": "ocr",
+          "signal": "FAILED",
+          "impact": "The extraction service is unavailable.",
+          "severity": "NONE",
+          "weight": null,
+          "counted": false
+        },
+        {
+          "source": "anomaly",
+          "signal": "NOT_AVAILABLE",
+          "impact": "Anomaly detection (PatchCore) is not implemented. This document has not been compared against a reference distribution.",
+          "severity": "NONE",
+          "weight": null,
+          "counted": false
+        }
+      ],
+      "evidence_coverage": 0.0,
+      "engine_version": "evidence-fusion-1.0.0",
+      "config_version": "1.0.0",
+      "bands": {
+        "review_at_or_above": 0.3,
+        "high_at_or_above": 0.65
+      },
+      "escalations": [
+        "Only 0% of the evidence was available, which is not enough to support a low-risk assessment."
+      ],
+      "narrative": "Fused risk score 0.00 across 0% of the available evidence places this screening in the REVIEW band. No adverse findings were recorded by any module that ran. Not scored because no result was produced: document forensics, face verification, rule validation, field extraction, anomaly analysis. Absent evidence has not been counted for or against this document. Escalated: Only 0% of the evidence was available, which is not enough to support a low-risk assessment. This is decision support. The operational decision rests with the officer."
+    },
+    "errors": [],
+    "duration_ms": null
+  },
+  "evidence": [
+    {
+      "module": "ocr",
+      "status": "FAILED",
+      "headline": "Field extraction",
+      "detail": "The extraction service is unavailable.",
+      "severity": "NONE"
+    },
+    {
+      "module": "validation",
+      "status": "NOT_AVAILABLE",
+      "headline": "Rule validation",
+      "detail": "No extracted fields were available to validate.",
+      "severity": "NONE"
+    },
+    {
+      "module": "face_verification",
+      "status": "FAILED",
+      "headline": "Face verification",
+      "detail": "The face comparison service is unavailable.",
+      "severity": "NONE"
+    },
+    {
+      "module": "document_forensics",
+      "status": "FAILED",
+      "headline": "Document forensics",
+      "detail": "Forensic analysis could not complete.",
+      "severity": "NONE"
+    },
+    {
+      "module": "anomaly",
+      "status": "NOT_AVAILABLE",
+      "headline": "Anomaly analysis",
+      "detail": "Anomaly detection (PatchCore) is not implemented. This document has not been compared against a reference distribution.",
+      "severity": "NONE"
+    }
+  ],
+  "generated_at": "2026-01-01T00:00:00.000Z"
+}

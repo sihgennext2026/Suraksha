@@ -1,0 +1,486 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ssb.gov.in/schemas/ssb-screening/1.0",
+  "title": "SSB26188 screening contracts",
+  "description": "Canonical wire contracts shared by every component of the SSB screening system: the Python inference services, the fusion engine, and the officer-facing React Native application. This document is the single source of truth. The Python mirror is contracts/python/ssb_contracts/, the TypeScript mirror is src/contracts/, and __tests__/contracts.test.ts asserts the mirrors have not drifted from it.",
+
+  "$defs": {
+    "schemaVersion": {
+      "const": "1.0",
+      "description": "Contract version. Bumped only on a breaking change to any shape in this document."
+    },
+
+    "moduleStatus": {
+      "enum": ["SUCCESS", "PARTIAL", "FAILED", "NOT_AVAILABLE"],
+      "description": "SUCCESS: the module ran and produced a complete result. PARTIAL: the module ran and produced a usable but incomplete result (a sub-component failed, or an input was missing). FAILED: the module ran and could not produce a result. NOT_AVAILABLE: the module did not run at all - it is not implemented, not deployed, or does not support this document type. FAILED and NOT_AVAILABLE are never treated as adverse findings; they are absences of evidence."
+    },
+
+    "documentType": {
+      "enum": [
+        "passport",
+        "visa",
+        "driving_license",
+        "national_id",
+        "permit",
+        "travel_authorization",
+        "other"
+      ],
+      "description": "Canonical document type. Wire values are snake_case and follow the spelling already used by the Python services (driving_license, not driving_licence). The officer declares this; no model infers it. Not every module supports every type - see moduleCapability."
+    },
+
+    "moduleName": {
+      "enum": [
+        "ocr",
+        "validation",
+        "face_verification",
+        "document_forensics",
+        "anomaly",
+        "risk"
+      ]
+    },
+
+    "moduleCapability": {
+      "type": "object",
+      "description": "Declares whether a module can process a given document type at all. A module that does not support a type returns NOT_AVAILABLE with reason UNSUPPORTED_DOCUMENT_TYPE. It never falls back to a different type's rules and never fabricates a PASS.",
+      "required": ["module", "document_type", "supported"],
+      "properties": {
+        "module": { "$ref": "#/$defs/moduleName" },
+        "document_type": { "$ref": "#/$defs/documentType" },
+        "supported": { "type": "boolean" },
+        "reason": { "type": ["string", "null"] }
+      }
+    },
+
+    "moduleError": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "Stable machine code for logs and retry logic. Never shown to an officer."
+        },
+        "message": {
+          "type": "string",
+          "description": "Plain-language sentence safe to display verbatim. Never contains a stack trace, an internal identifier, or personal data."
+        },
+        "retryable": { "type": "boolean" }
+      }
+    },
+
+    "envelope": {
+      "type": "object",
+      "description": "Every module response is wrapped in this envelope, whatever produced it. A consumer can read status, module and model_version without knowing which module it is looking at.",
+      "required": [
+        "schema_version",
+        "case_id",
+        "module",
+        "status",
+        "model_version",
+        "timestamp",
+        "result",
+        "errors"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/schemaVersion" },
+        "case_id": { "type": "string" },
+        "module": { "$ref": "#/$defs/moduleName" },
+        "status": { "$ref": "#/$defs/moduleStatus" },
+        "model_version": {
+          "type": "string",
+          "description": "Identifies the exact implementation that produced this result, including whether it is a mock. Recorded against the case so a later model update cannot retroactively change what an officer was shown."
+        },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "result": {
+          "description": "Module-specific payload. Null whenever status is FAILED or NOT_AVAILABLE - a consumer must never find a partially populated result behind a non-success status.",
+          "type": ["object", "null"]
+        },
+        "errors": { "type": "array", "items": { "$ref": "#/$defs/moduleError" } },
+        "duration_ms": { "type": ["number", "null"] }
+      }
+    },
+
+    "boundingBox": {
+      "type": "array",
+      "description": "[x, y, width, height] in NORMALISED coordinates (0..1) relative to the perspective-corrected document image. Normalised rather than pixel coordinates so a consumer can draw the region without also transporting the image dimensions.",
+      "items": { "type": "number", "minimum": 0, "maximum": 1 },
+      "minItems": 4,
+      "maxItems": 4
+    },
+
+    "ocrResult": {
+      "type": "object",
+      "description": "Structured document data extracted by the OCR service (Phase_1: orientation -> segmentation -> perspective -> PP-OCRv5 -> field extraction).",
+      "required": ["document_type", "fields", "mrz", "detection", "overall_confidence"],
+      "properties": {
+        "document_type": { "$ref": "#/$defs/documentType" },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["key", "value", "source"],
+            "properties": {
+              "key": { "type": "string" },
+              "value": {
+                "type": ["string", "null"],
+                "description": "Null when the field was not found. Never guessed and never defaulted."
+              },
+              "confidence": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+              "source": {
+                "enum": [
+                  "mrz",
+                  "label_same_line",
+                  "label_next_line",
+                  "standalone_id",
+                  "not_found"
+                ],
+                "description": "Provenance. MRZ-sourced fields come from a checksummed fixed layout; label-matched fields come from a heuristic over free text. Downstream consumers may weight them differently."
+              },
+              "region": { "oneOf": [{ "$ref": "#/$defs/boundingBox" }, { "type": "null" }] }
+            }
+          }
+        },
+        "mrz": {
+          "type": "object",
+          "required": ["present", "lines", "check_digits", "checksum_valid"],
+          "properties": {
+            "present": {
+              "type": "boolean",
+              "description": "False for document types that carry no machine-readable zone. Only passport and visa are MRZ-bearing; the OCR service must not crop an MRZ band from any other type."
+            },
+            "format": { "enum": ["TD1", "TD2", "TD3", "MRVA", "MRVB", "NONE"] },
+            "lines": { "type": "array", "items": { "type": "string" } },
+            "check_digits": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["field", "observed", "computed", "valid"],
+                "properties": {
+                  "field": { "type": "string" },
+                  "observed": { "type": "string" },
+                  "computed": { "type": "string" },
+                  "valid": { "type": "boolean" }
+                }
+              }
+            },
+            "checksum_valid": {
+              "type": ["boolean", "null"],
+              "description": "Null means the checksum was not evaluated at this stage. Distinct from false, which asserts it was tested and did not match."
+            },
+            "confidence": { "type": ["number", "null"] }
+          }
+        },
+        "detection": {
+          "type": "object",
+          "required": ["detected"],
+          "properties": {
+            "detected": { "type": "boolean" },
+            "confidence": { "type": ["number", "null"] },
+            "box": { "oneOf": [{ "$ref": "#/$defs/boundingBox" }, { "type": "null" }] },
+            "correction_mode": { "type": ["string", "null"] },
+            "orientation_corrected": { "type": "boolean" }
+          }
+        },
+        "overall_confidence": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "language": { "type": ["string", "null"] }
+      }
+    },
+
+    "validationCheckStatus": {
+      "enum": ["PASS", "FAIL", "REVIEW", "NOT_APPLICABLE", "NOT_AVAILABLE"],
+      "description": "PASS: the rule ran and the document satisfied it. FAIL: the rule ran and the document did not satisfy it. REVIEW: the rule ran and the outcome is inconclusive or borderline. NOT_APPLICABLE: the rule does not apply to this document type (an expiry rule on a document with no expiry). NOT_AVAILABLE: the rule could not run because its input was missing. NOT_APPLICABLE and NOT_AVAILABLE are kept apart on purpose - one means the rule is irrelevant, the other means the evidence is absent, and neither is a failure.",
+      "$comment": "Superset of the three statuses in the integration brief. REVIEW is kept because the existing engine emits it and collapsing it into FAIL would turn an inconclusive check into an INVALID document. NOT_APPLICABLE is kept because collapsing it into NOT_AVAILABLE would lose the distinction between an irrelevant rule and a missing input."
+    },
+
+    "validationResult": {
+      "type": "object",
+      "description": "Deterministic rule evidence. Pure functions over the OCR output - no model is involved, and the same input always yields the same verdict. A validation failure does NOT mean the document is fake; it means a rule was not satisfied and an officer should look.",
+      "required": ["decision", "checks", "summary", "rule_version"],
+      "properties": {
+        "decision": {
+          "enum": ["VALID", "REVIEW", "INVALID"],
+          "description": "Worst-case roll-up across applicable checks. Never a statement about authenticity."
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["rule_id", "status", "message"],
+            "properties": {
+              "rule_id": { "type": "string" },
+              "status": { "$ref": "#/$defs/validationCheckStatus" },
+              "message": { "type": "string" },
+              "observed": { "type": ["string", "null"] },
+              "expectation": { "type": ["string", "null"] },
+              "fields": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "summary": {
+          "type": "object",
+          "required": ["passed", "failed", "review", "not_applicable", "not_available"],
+          "properties": {
+            "passed": { "type": "integer", "minimum": 0 },
+            "failed": { "type": "integer", "minimum": 0 },
+            "review": { "type": "integer", "minimum": 0 },
+            "not_applicable": { "type": "integer", "minimum": 0 },
+            "not_available": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "rule_version": { "type": "string" }
+      }
+    },
+
+    "faceQuality": {
+      "type": "object",
+      "description": "Quality of one face sample. NOTE: the ArcFace pipeline reports pass/fail checks and raw measurements, not a single 0..1 quality score. `score` is therefore null unless a scoring model is actually present - inventing a number here would be exactly the fabricated confidence this contract forbids. Consumers should render `acceptable` and the metrics.",
+      "required": ["acceptable", "score"],
+      "properties": {
+        "acceptable": {
+          "type": ["boolean", "null"],
+          "description": "Whether every quality gate passed. Null when quality was not assessed."
+        },
+        "score": {
+          "type": ["number", "null"],
+          "description": "Model-provided quality score in 0..1. NULL when the model provides none - which is the case for the current ArcFace pipeline."
+        },
+        "metrics": {
+          "type": ["object", "null"],
+          "description": "Raw measurements as reported, in their own units. Not normalised.",
+          "properties": {
+            "face_width_px": { "type": ["number", "null"] },
+            "face_height_px": { "type": ["number", "null"] },
+            "brightness": { "type": ["number", "null"] },
+            "blur_score": { "type": ["number", "null"] },
+            "yaw_proxy": { "type": ["number", "null"] },
+            "roll_deg": { "type": ["number", "null"] }
+          }
+        },
+        "checks": {
+          "type": ["object", "null"],
+          "properties": {
+            "face_size_ok": { "type": ["boolean", "null"] },
+            "brightness_ok": { "type": ["boolean", "null"] },
+            "blur_ok": { "type": ["boolean", "null"] },
+            "pose_ok": { "type": ["boolean", "null"] }
+          }
+        }
+      }
+    },
+
+    "faceVerificationResult": {
+      "type": "object",
+      "description": "1:1 comparison of the document portrait against the live capture. Pipeline: face detection -> 5-point alignment -> 112x112 -> ArcFace R50 -> 512-D normalised embeddings -> cosine similarity -> three-way decision.",
+      "required": ["similarity", "decision", "thresholds", "quality"],
+      "properties": {
+        "similarity": {
+          "type": "number",
+          "minimum": -1,
+          "maximum": 1,
+          "description": "RAW cosine similarity between the two 512-D embeddings. This is NOT a probability and NOT a percentage. It must never be rescaled, and must never be rendered with a percent sign."
+        },
+        "decision": { "enum": ["MATCH", "REVIEW", "NO_MATCH"] },
+        "thresholds": {
+          "type": "object",
+          "required": ["match", "review"],
+          "properties": {
+            "match": { "type": "number" },
+            "review": { "type": "number" }
+          },
+          "description": "The boundaries in force when this result was produced, carried with the result so a later re-tuning cannot change the meaning of a stored case."
+        },
+        "quality": {
+          "type": "object",
+          "required": ["document_face", "live_face"],
+          "properties": {
+            "document_face": { "$ref": "#/$defs/faceQuality" },
+            "live_face": { "$ref": "#/$defs/faceQuality" }
+          }
+        },
+        "embedding_dim": { "type": ["integer", "null"] }
+      }
+    },
+
+    "manipulationType": {
+      "enum": [
+        "PHOTO_REPLACEMENT",
+        "TEXT_MANIPULATION",
+        "STAMP_SIGNATURE_MANIPULATION",
+        "COPY_PASTE_SPLICING",
+        "OTHER",
+        "NONE"
+      ]
+    },
+
+    "documentForensicsResult": {
+      "type": "object",
+      "description": "Tamper detection over the perspective-corrected document image. The production implementation will be DINOv2 ViT-B/14 with a forensic classification head plus a patch localisation head. It does not exist yet; the current implementation is a mock that emits this exact contract.",
+      "required": ["tampered", "tamper_score", "manipulation_type", "suspicious_regions"],
+      "properties": {
+        "tampered": { "type": "boolean" },
+        "tamper_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Classification head output. A model score, not a calibrated probability of fraud."
+        },
+        "manipulation_type": { "$ref": "#/$defs/manipulationType" },
+        "type_score": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "suspicious_regions": {
+          "type": "array",
+          "description": "Localisation head output. May legitimately be empty even when tampered is true: the classifier can fire without the localiser resolving a region. An empty list is not evidence of authenticity.",
+          "items": {
+            "type": "object",
+            "required": ["bbox", "score"],
+            "properties": {
+              "bbox": { "$ref": "#/$defs/boundingBox" },
+              "score": { "type": "number", "minimum": 0, "maximum": 1 },
+              "note": { "type": ["string", "null"] }
+            }
+          }
+        }
+      }
+    },
+
+    "anomalyResult": {
+      "type": "object",
+      "description": "Unsupervised deviation from the genuine-document reference distribution. PatchCore is NOT IMPLEMENTED - no service produces this payload today, and every anomaly envelope carries status NOT_AVAILABLE with a null result. The shape is defined so the module can be added without a contract change.",
+      "required": ["anomaly_score", "anomalous", "suspicious_regions"],
+      "properties": {
+        "anomaly_score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "anomalous": { "type": "boolean" },
+        "threshold": { "type": ["number", "null"] },
+        "reference_set_size": { "type": ["integer", "null"] },
+        "suspicious_regions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["bbox", "score"],
+            "properties": {
+              "bbox": { "$ref": "#/$defs/boundingBox" },
+              "score": { "type": "number" },
+              "note": { "type": ["string", "null"] }
+            }
+          }
+        }
+      }
+    },
+
+    "riskContributor": {
+      "type": "object",
+      "required": ["source", "signal", "impact", "severity"],
+      "properties": {
+        "source": { "$ref": "#/$defs/moduleName" },
+        "signal": {
+          "type": "string",
+          "description": "The semantic finding, in the module's own vocabulary: NO_MATCH, INVALID, TAMPERED, NOT_AVAILABLE, FAILED."
+        },
+        "impact": {
+          "type": "string",
+          "description": "One sentence an officer can read and act on. Evidence-oriented, never a verdict on authenticity."
+        },
+        "severity": { "enum": ["NONE", "LOW", "MEDIUM", "HIGH"] },
+        "weight": {
+          "type": ["number", "null"],
+          "description": "Share of the fused score this contributor carried. Null for contributors that were excluded from scoring (NOT_AVAILABLE, FAILED)."
+        },
+        "counted": {
+          "type": "boolean",
+          "description": "False when the module contributed no evidence and was excluded from the weighted mean. Excluded modules are still listed so an officer can see what was missing."
+        }
+      }
+    },
+
+    "riskResult": {
+      "type": "object",
+      "description": "Evidence Fusion Engine output. Deterministic weighted fusion over the module evidence - NOT LightGBM, and not a learned model of any kind. This is decision support: it never issues an operational verdict.",
+      "required": [
+        "risk_score",
+        "risk_level",
+        "contributors",
+        "engine_version",
+        "evidence_coverage"
+      ],
+      "properties": {
+        "risk_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Normalised 0..1. Defined by configuration, not measured from data. Do not present it as a probability of fraud."
+        },
+        "risk_level": { "enum": ["LOW", "REVIEW", "HIGH"] },
+        "contributors": { "type": "array", "items": { "$ref": "#/$defs/riskContributor" } },
+        "bands": {
+          "type": "object",
+          "properties": {
+            "review_at_or_above": { "type": "number" },
+            "high_at_or_above": { "type": "number" }
+          }
+        },
+        "evidence_coverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Fraction of the total configured weight that was actually available. Below the configured minimum the result is floored at REVIEW, because a confident LOW cannot be justified from partial evidence."
+        },
+        "escalations": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Named rules that raised the band floor, so the officer can see why a low fused score still produced REVIEW or HIGH."
+        },
+        "narrative": { "type": "string" },
+        "engine_version": { "type": "string" },
+        "config_version": { "type": "string" }
+      }
+    },
+
+    "evidenceItem": {
+      "type": "object",
+      "description": "One row of the officer-facing evidence index. Derived by the fusion engine, not by the frontend.",
+      "required": ["module", "status", "headline", "detail"],
+      "properties": {
+        "module": { "$ref": "#/$defs/moduleName" },
+        "status": { "$ref": "#/$defs/moduleStatus" },
+        "severity": { "enum": ["NONE", "LOW", "MEDIUM", "HIGH"] },
+        "headline": { "type": "string" },
+        "detail": { "type": "string" }
+      }
+    },
+
+    "screeningCaseResult": {
+      "type": "object",
+      "description": "The case-level result. This is what the officer-facing application consumes. It is assembled by the backend, never by the frontend: the app renders this document and does not derive findings from the module payloads itself.",
+      "required": [
+        "schema_version",
+        "case_id",
+        "document_type",
+        "ocr",
+        "validation",
+        "face_verification",
+        "document_forensics",
+        "anomaly",
+        "risk",
+        "evidence",
+        "generated_at"
+      ],
+      "properties": {
+        "schema_version": { "$ref": "#/$defs/schemaVersion" },
+        "case_id": { "type": "string" },
+        "document_type": { "$ref": "#/$defs/documentType" },
+        "ocr": { "$ref": "#/$defs/envelope" },
+        "validation": { "$ref": "#/$defs/envelope" },
+        "face_verification": { "$ref": "#/$defs/envelope" },
+        "document_forensics": { "$ref": "#/$defs/envelope" },
+        "anomaly": { "$ref": "#/$defs/envelope" },
+        "risk": { "$ref": "#/$defs/envelope" },
+        "evidence": { "type": "array", "items": { "$ref": "#/$defs/evidenceItem" } },
+        "generated_at": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+
+  "oneOf": [
+    { "$ref": "#/$defs/envelope" },
+    { "$ref": "#/$defs/screeningCaseResult" }
+  ]
+}

@@ -1,0 +1,117 @@
+{
+  "config_version": "1.0.0",
+  "_comment": [
+    "SINGLE SOURCE OF TRUTH for every threshold, band and weight in the SSB screening system.",
+    "Both the Python services and the React Native app read their values from this file:",
+    "  Python  -> contracts/python/ssb_contracts/config.py (loads this file at import)",
+    "  RN/TS   -> src/config/thresholds.ts (mirror, kept honest by __tests__/contracts.test.ts)",
+    "No component may define a threshold of its own. If a number below changes, bump",
+    "config_version and every consumer picks it up.",
+    "",
+    "NONE OF THESE VALUES ARE SCIENTIFICALLY CALIBRATED FOR PRODUCTION USE.",
+    "Each carries its own provenance and confidence note. Read them before quoting a number."
+  ],
+
+  "face_verification": {
+    "_comment": [
+      "Raw ArcFace R50 cosine similarity thresholds. The score is a cosine similarity in",
+      "[-1, 1], NOT a probability and NOT a percentage. Never rescale it for display.",
+      "similarity >= match           -> MATCH",
+      "review <= similarity < match  -> REVIEW",
+      "similarity <  review          -> NO_MATCH"
+    ],
+    "match": 0.3,
+    "review": 0.14,
+    "source": "gowtham-pepline/src/faceverify/decision.py (MATCH_THRESHOLD, REVIEW_THRESHOLD)",
+    "calibration": "LFW sweep: EER t=0.1007 (FAR 4.54%/FRR 4.55%), FAR<=1% t=0.1407, FAR<=0.1% t=0.2254",
+    "confidence": "PROVISIONAL. Calibrated on LFW (same-domain photo pairs). Production use is cross-domain (document portrait vs live capture) and is NOT validated."
+  },
+
+  "document_forensics": {
+    "_comment": [
+      "Applies to the DINOv2 tamper detection module. The real model does not exist yet;",
+      "these bands describe how a tamper_score in [0, 1] is banded once it does.",
+      "The mock emits scores consistent with these bands so the pipeline downstream of it",
+      "is exercised exactly as it will be in production."
+    ],
+    "tampered_at_or_above": 0.5,
+    "review_at_or_above": 0.2,
+    "region_reporting_floor": 0.15,
+    "source": "contracts/python/ssb_contracts/services/forensics_mock.py",
+    "confidence": "PLACEHOLDER. No trained model exists. These bands must be re-derived from a validation set before the real DINOv2 head ships."
+  },
+
+  "risk_fusion": {
+    "_comment": [
+      "Evidence Fusion Engine. NOT LightGBM - this is deterministic weighted fusion.",
+      "risk_score is a normalised value in [0, 1]. It is a fused judgement, not a model",
+      "probability, and it is defined by this configuration rather than measured.",
+      "",
+      "Weights apply only to modules that actually returned evidence. Modules that are",
+      "NOT_AVAILABLE or FAILED are dropped from the weighted mean and the remaining",
+      "weights are renormalised, so missing evidence never raises the score."
+    ],
+    "weights": {
+      "document_forensics": 0.4,
+      "face_verification": 0.28,
+      "validation": 0.22,
+      "ocr": 0.06,
+      "anomaly": 0.04
+    },
+    "bands": {
+      "review_at_or_above": 0.3,
+      "high_at_or_above": 0.65
+    },
+    "minimum_evidence_weight": 0.9,
+    "_minimum_evidence_weight_comment": [
+      "The four core modules (forensics 0.40 + face 0.28 + validation 0.22 + ocr 0.06)",
+      "total 0.96. Requiring 0.90 therefore means: all four must have produced evidence",
+      "for a LOW clearance to stand, and only the anomaly gap (0.04, permanently",
+      "NOT_AVAILABLE while PatchCore is unimplemented) is tolerated.",
+      "",
+      "This is the rule that stops a screening being cleared while the module that",
+      "would have caught the problem was down. A case where tamper detection never",
+      "ran is not a low-risk case; it is an unexamined one."
+    ],
+    "escalations": {
+      "_comment": [
+        "A strong single signal must not be diluted by other modules scoring low.",
+        "Each rule raises the FLOOR of the final band; none can lower it.",
+        "",
+        "The REVIEW floors matter as much as the HIGH one: a module that says",
+        "'I cannot tell' must surface to the officer, not be averaged away by four",
+        "modules that had nothing to report."
+      ],
+      "forensics_tampered_floor": "HIGH",
+      "face_no_match_floor": "REVIEW",
+      "face_review_floor": "REVIEW",
+      "validation_invalid_floor": "REVIEW",
+      "validation_review_floor": "REVIEW",
+      "insufficient_evidence_floor": "REVIEW"
+    },
+    "source": "Weight ordering follows risk_Score/riskengine/risk.py (tampering 0.45 > face 0.30 > validation 0.25), extended to cover OCR and anomaly.",
+    "confidence": "PROVISIONAL. Weights are an engineering judgement about signal strength, not a fit to labelled fraud data. Do not present them as calibrated."
+  },
+
+  "ocr": {
+    "_comment": [
+      "Mean per-field OCR recognition confidence, as reported by PP-OCRv5. Used only to",
+      "flag a weak read to the officer - it never decides anything on its own."
+    ],
+    "low_confidence_below": 0.75,
+    "review_confidence_below": 0.9,
+    "source": "Phase_1 PP-OCRv5 per-line confidences (ExtractResponse.field_lines[].confidence)",
+    "confidence": "HEURISTIC. Display and triage only."
+  },
+
+  "anomaly": {
+    "_comment": [
+      "PatchCore is NOT IMPLEMENTED. No service produces this evidence. The block exists so",
+      "the threshold has a defined home the day the module lands; until then every anomaly",
+      "result is NOT_AVAILABLE and nothing reads these numbers."
+    ],
+    "anomalous_at_or_above": null,
+    "source": null,
+    "confidence": "NOT IMPLEMENTED. PatchCore has not been built; no value has been derived."
+  }
+}

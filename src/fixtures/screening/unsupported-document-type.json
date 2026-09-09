@@ -1,0 +1,235 @@
+{
+  "schema_version": "1.0",
+  "case_id": "FIXTURE-UNSUPPORTED_DOCUMENT_TYPE",
+  "document_type": "travel_authorization",
+  "ocr": {
+    "schema_version": "1.0",
+    "case_id": "FIXTURE-UNSUPPORTED_DOCUMENT_TYPE",
+    "module": "ocr",
+    "status": "NOT_AVAILABLE",
+    "model_version": "phase1-ppocrv5-unet-1.0.0",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "result": null,
+    "errors": [
+      {
+        "code": "UNSUPPORTED_DOCUMENT_TYPE",
+        "message": "The extraction service has no field schema for travel authorisation. No fields were read.",
+        "retryable": false
+      }
+    ],
+    "duration_ms": null
+  },
+  "validation": {
+    "schema_version": "1.0",
+    "case_id": "FIXTURE-UNSUPPORTED_DOCUMENT_TYPE",
+    "module": "validation",
+    "status": "NOT_AVAILABLE",
+    "model_version": "backend-validation-1.0.0",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "result": null,
+    "errors": [
+      {
+        "code": "UNSUPPORTED_DOCUMENT_TYPE",
+        "message": "No validation rule set exists for travel authorisation. Rules from another document type are deliberately not substituted.",
+        "retryable": false
+      }
+    ],
+    "duration_ms": null
+  },
+  "face_verification": {
+    "schema_version": "1.0",
+    "case_id": "FIXTURE-UNSUPPORTED_DOCUMENT_TYPE",
+    "module": "face_verification",
+    "status": "SUCCESS",
+    "model_version": "arcface-r50-buffalo_m-w600k",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "result": {
+      "similarity": 0.52,
+      "decision": "MATCH",
+      "thresholds": {
+        "match": 0.3,
+        "review": 0.14
+      },
+      "quality": {
+        "document_face": {
+          "acceptable": true,
+          "score": null,
+          "metrics": {
+            "face_width_px": 186.0,
+            "face_height_px": 214.0,
+            "brightness": 118.0,
+            "blur_score": 38.0,
+            "yaw_proxy": 0.06,
+            "roll_deg": 1.4
+          },
+          "checks": {
+            "face_size_ok": true,
+            "brightness_ok": true,
+            "blur_ok": true,
+            "pose_ok": true
+          }
+        },
+        "live_face": {
+          "acceptable": true,
+          "score": null,
+          "metrics": {
+            "face_width_px": 186.0,
+            "face_height_px": 214.0,
+            "brightness": 134.0,
+            "blur_score": 61.0,
+            "yaw_proxy": 0.03,
+            "roll_deg": 1.4
+          },
+          "checks": {
+            "face_size_ok": true,
+            "brightness_ok": true,
+            "blur_ok": true,
+            "pose_ok": true
+          }
+        }
+      },
+      "embedding_dim": 512
+    },
+    "errors": [],
+    "duration_ms": null
+  },
+  "document_forensics": {
+    "schema_version": "1.0",
+    "case_id": "FIXTURE-UNSUPPORTED_DOCUMENT_TYPE",
+    "module": "document_forensics",
+    "status": "SUCCESS",
+    "model_version": "mock-dinov2-v0",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "result": {
+      "tampered": false,
+      "tamper_score": 0.04,
+      "manipulation_type": "NONE",
+      "type_score": null,
+      "suspicious_regions": []
+    },
+    "errors": [],
+    "duration_ms": null
+  },
+  "anomaly": {
+    "schema_version": "1.0",
+    "case_id": "FIXTURE-UNSUPPORTED_DOCUMENT_TYPE",
+    "module": "anomaly",
+    "status": "NOT_AVAILABLE",
+    "model_version": "not-available",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "result": null,
+    "errors": [
+      {
+        "code": "ANOMALY_NOT_IMPLEMENTED",
+        "message": "Anomaly detection (PatchCore) is not implemented. This document has not been compared against a reference distribution.",
+        "retryable": false
+      }
+    ],
+    "duration_ms": null
+  },
+  "risk": {
+    "schema_version": "1.0",
+    "case_id": "FIXTURE-UNSUPPORTED_DOCUMENT_TYPE",
+    "module": "risk",
+    "status": "SUCCESS",
+    "model_version": "evidence-fusion-1.0.0",
+    "timestamp": "2026-01-01T00:00:00.000Z",
+    "result": {
+      "risk_score": 0.0235,
+      "risk_level": "REVIEW",
+      "contributors": [
+        {
+          "source": "document_forensics",
+          "signal": "NO_TAMPERING_DETECTED",
+          "impact": "No tampering indicators were found (tamper score 0.04).",
+          "severity": "NONE",
+          "weight": 0.4,
+          "counted": true
+        },
+        {
+          "source": "face_verification",
+          "signal": "MATCH",
+          "impact": "Cosine similarity 0.520 is at or above the match boundary 0.30.",
+          "severity": "NONE",
+          "weight": 0.28,
+          "counted": true
+        },
+        {
+          "source": "validation",
+          "signal": "NOT_AVAILABLE",
+          "impact": "No validation rule set exists for travel authorisation. Rules from another document type are deliberately not substituted.",
+          "severity": "NONE",
+          "weight": null,
+          "counted": false
+        },
+        {
+          "source": "ocr",
+          "signal": "NOT_AVAILABLE",
+          "impact": "The extraction service has no field schema for travel authorisation. No fields were read.",
+          "severity": "NONE",
+          "weight": null,
+          "counted": false
+        },
+        {
+          "source": "anomaly",
+          "signal": "NOT_AVAILABLE",
+          "impact": "Anomaly detection (PatchCore) is not implemented. This document has not been compared against a reference distribution.",
+          "severity": "NONE",
+          "weight": null,
+          "counted": false
+        }
+      ],
+      "evidence_coverage": 0.68,
+      "engine_version": "evidence-fusion-1.0.0",
+      "config_version": "1.0.0",
+      "bands": {
+        "review_at_or_above": 0.3,
+        "high_at_or_above": 0.65
+      },
+      "escalations": [
+        "Only 68% of the evidence was available, which is not enough to support a low-risk assessment."
+      ],
+      "narrative": "Fused risk score 0.02 across 68% of the available evidence places this screening in the REVIEW band. Leading findings: No tampering indicators were found (tamper score 0.04). Not scored because no result was produced: rule validation, field extraction, anomaly analysis. Absent evidence has not been counted for or against this document. Escalated: Only 68% of the evidence was available, which is not enough to support a low-risk assessment. This is decision support. The operational decision rests with the officer."
+    },
+    "errors": [],
+    "duration_ms": null
+  },
+  "evidence": [
+    {
+      "module": "ocr",
+      "status": "NOT_AVAILABLE",
+      "headline": "Field extraction",
+      "detail": "The extraction service has no field schema for travel authorisation. No fields were read.",
+      "severity": "NONE"
+    },
+    {
+      "module": "validation",
+      "status": "NOT_AVAILABLE",
+      "headline": "Rule validation",
+      "detail": "No validation rule set exists for travel authorisation. Rules from another document type are deliberately not substituted.",
+      "severity": "NONE"
+    },
+    {
+      "module": "face_verification",
+      "status": "SUCCESS",
+      "headline": "Face verification",
+      "detail": "Match · similarity 0.520",
+      "severity": "NONE"
+    },
+    {
+      "module": "document_forensics",
+      "status": "SUCCESS",
+      "headline": "Document forensics",
+      "detail": "No tampering detected · score 0.04",
+      "severity": "NONE"
+    },
+    {
+      "module": "anomaly",
+      "status": "NOT_AVAILABLE",
+      "headline": "Anomaly analysis",
+      "detail": "Anomaly detection (PatchCore) is not implemented. This document has not been compared against a reference distribution.",
+      "severity": "NONE"
+    }
+  ],
+  "generated_at": "2026-01-01T00:00:00.000Z"
+}
