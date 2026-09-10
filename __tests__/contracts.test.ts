@@ -18,7 +18,7 @@ import {
 } from '@/config/thresholds';
 import { DOCUMENT_TYPE_DESCRIPTORS } from '@/constants/documents';
 import { SCREENING_FIXTURES } from '@/services/mock/fixtures';
-import { INTEGRATION_STATUS } from '@/services/ai/registry';
+import { getIntegrationStatus } from '@/services/ai/registry';
 
 /**
  * Contract conformance for the application side.
@@ -291,6 +291,10 @@ describe('generated fixtures', () => {
 });
 
 describe('integration status', () => {
+  // With no service configured the app replays fixtures, which is the state the
+  // read-out must describe honestly.
+  const INTEGRATION_STATUS = getIntegrationStatus(null);
+
   it('states plainly that tamper detection is a mock', () => {
     const forensics = INTEGRATION_STATUS.find((entry) =>
       entry.module.toLowerCase().includes('forensics'),

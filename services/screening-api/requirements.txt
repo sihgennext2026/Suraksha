@@ -1,0 +1,22 @@
+# The screening service loads Phase_1, backend/validation and the faceverify
+# pipeline into one process, so this is the union of their requirements.
+#
+# The paddle stack is pinned to 3.x deliberately: PP-OCRv5 does not exist in
+# paddleocr 2.x, and Phase_1's orientation stage imports paddlex, which only
+# ships as a paddleocr>=3 dependency.
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+python-multipart>=0.0.9
+onnxruntime>=1.17.0
+opencv-python-headless>=4.8.0
+numpy>=1.24
+# Pinned, not floated: paddlepaddle 3.3.1 raises
+#   NotImplementedError: ConvertPirAttribute2RuntimeAttribute not support
+#   [pir::ArrayAttribute<pir::DoubleAttribute>]  (onednn_instruction.cc)
+# on the first inference of the PP-LCNet orientation model, and neither
+# FLAGS_use_mkldnn=0 nor FLAGS_enable_pir_api=0 avoids it because PaddleX sets
+# the predictor's oneDNN option itself. 3.0.0 runs the same graphs correctly.
+paddlepaddle==3.0.0
+paddleocr>=3.0.0
+paddlex>=3.0.0
+zxing-cpp>=2.0.0

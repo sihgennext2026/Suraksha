@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Switch, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
@@ -8,6 +8,7 @@ import { Panel, Section } from '@/components/layout/Panel';
 import { Screen } from '@/components/layout/Screen';
 import { Button } from '@/components/primitives/Button';
 import { Text } from '@/components/primitives/Text';
+import { TextField } from '@/components/primitives/TextField';
 import { KeyValueRow } from '@/components/data/KeyValueRow';
 import { SyncBadge } from '@/components/data/StatusBadge';
 import { BottomSheet, ConfirmDialog } from '@/components/overlay/Sheet';
@@ -26,11 +27,12 @@ import {
   selectIsOnline,
   connectionTypeLabel,
 } from '@/stores/connectivityStore';
-import { useSettingsStore } from '@/stores/settingsStore';
+import { selectScreeningServiceUrl, useSettingsStore } from '@/stores/settingsStore';
 import { useTheme } from '@/theme';
 import type { ThemePreference } from '@/theme';
 import { SCREENING_FIXTURES } from '@/services/mock/fixtures';
-import { INTEGRATION_STATUS } from '@/services/ai/registry';
+import { getIntegrationStatus, isUsingRealScreening } from '@/services/ai/registry';
+import { normaliseServiceUrl } from '@/config/screeningService';
 import { formatDateTime, formatRelative } from '@/utils/date';
 
 /**
@@ -50,6 +52,16 @@ export function SettingsScreen() {
   const signOut = useAuthStore((state) => state.signOut);
   const online = useConnectivityStore(selectIsOnline);
   const connectionType = useConnectivityStore((state) => state.connectionType);
+
+  const serviceUrl = useSettingsStore(selectScreeningServiceUrl);
+  const setScreeningServiceUrl = useSettingsStore((state) => state.setScreeningServiceUrl);
+  // Held as a draft so a half-typed address is not saved on every keystroke and
+  // does not blank the working one mid-edit.
+  const [serviceUrlDraft, setServiceUrlDraft] = useState(serviceUrl ?? '');
+  const commitServiceUrl = useCallback(() => {
+    setScreeningServiceUrl(normaliseServiceUrl(serviceUrlDraft));
+  }, [serviceUrlDraft, setScreeningServiceUrl]);
+  const integrationStatus = useMemo(() => getIntegrationStatus(serviceUrl), [serviceUrl]);
 
   const themePreference = useSettingsStore((state) => state.theme);
   const setTheme = useSettingsStore((state) => state.setTheme);
@@ -293,7 +305,7 @@ export function SettingsScreen() {
           description="What each check is backed by today. Read this before quoting a finding."
         >
           <Panel padded={false}>
-            {INTEGRATION_STATUS.map((entry, index) => (
+            {integrationStatus.map((entry, index) => (
               <View
                 key={entry.module}
                 accessible
@@ -343,6 +355,35 @@ export function SettingsScreen() {
 
         <Section title="Device status">
           <SystemStatusPanel subsystems={status.subsystems} />
+        </Section>
+
+        <Section
+          title="Screening service"
+          description="Where the models run. Extraction, rule validation and face verification need this address; everything else works without it."
+        >
+          <Panel>
+            <TextField
+              label="Service address"
+              value={serviceUrlDraft}
+              onChangeText={setServiceUrlDraft}
+              onBlur={commitServiceUrl}
+              placeholder="http://10.0.0.5:8000"
+              autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType="url"
+              mono
+              error={serviceUrlDraft.trim() && !normaliseServiceUrl(serviceUrlDraft) ? 'Enter a full address, for example http://10.0.0.5:8000' : undefined}
+              hint="Leave empty to fall back to the address this build shipped with."
+            />
+          </Panel>
+
+          {isUsingRealScreening(serviceUrl) ? null : (
+            <InlineNotice
+              tone="caution"
+              title="No screening service is configured"
+              message="Screenings replay a generated document. Nothing shown comes from the capture, and the integration table below says so for each module."
+            />
+          )}
         </Section>
 
         <Section

@@ -8,6 +8,9 @@ import {
   UnavailableAnomalyService,
 } from '@/services/mock/mockModuleServices';
 import { MockScreeningService } from '@/services/mock/mockScreeningService';
+import { resolveScreeningServiceUrl } from '@/config/screeningService';
+
+import { HttpScreeningService } from './httpScreeningService';
 
 /**
  * The single point at which the application binds to an implementation.
@@ -30,12 +33,33 @@ export interface ServiceRegistryOptions {
    * Forces a specific scenario. Exposed through Settings so every module state
    * — including tamper detection and a failed module — can be exercised on real
    * hardware rather than only in tests.
+   *
+   * This only ever selects a replayed fixture. It cannot alter what the real
+   * service returns, and it is ignored whenever one is configured.
    */
   scenario?: string;
+  /** Officer override for the service address; falls back to the build's. */
+  serviceUrl?: string | null;
 }
 
+/**
+ * Chooses the implementation for this device.
+ *
+ * A configured service address means real inference, and the fixtures are then
+ * unreachable: replaying an invented result against a capture the officer just
+ * took would be indistinguishable, to them, from a real finding. With no
+ * address configured there is nothing to call, so the app falls back to
+ * replaying generated documents and says so in Settings.
+ */
 export function getScreeningService(options: ServiceRegistryOptions = {}): ScreeningService {
+  const baseUrl = resolveScreeningServiceUrl(options.serviceUrl);
+  if (baseUrl) return new HttpScreeningService({ baseUrl });
   return new MockScreeningService(options.scenario);
+}
+
+/** Whether this device is wired to a real screening service. */
+export function isUsingRealScreening(serviceUrl?: string | null): boolean {
+  return resolveScreeningServiceUrl(serviceUrl) !== null;
 }
 
 /** For a deployment that calls each module separately. */
@@ -67,25 +91,51 @@ export interface ModuleIntegration {
   note: string;
 }
 
-export const INTEGRATION_STATUS: readonly ModuleIntegration[] = [
-  {
-    module: 'Field extraction (OCR/MRZ)',
-    state: 'MOCK',
-    implementation: 'Phase_1 PP-OCRv5 + U-Net — service exists, not yet wired to the app',
-    note: 'The extraction service is built and adapted to the contract. The app replays generated results until the endpoint is reachable.',
-  },
-  {
-    module: 'Rule validation',
-    state: 'MOCK',
-    implementation: 'backend/validation — service exists, not yet wired to the app',
-    note: 'Deterministic rules are implemented in Python and adapted to the contract.',
-  },
-  {
-    module: 'Face verification',
-    state: 'MOCK',
-    implementation: 'ArcFace R50 (buffalo_m) — pipeline exists, not yet wired to the app',
-    note: 'Thresholds are the pipeline’s own calibrated values and are provisional.',
-  },
+/**
+ * What each module is backed by for this device, right now.
+ *
+ * Three of these change with the service address, and the read-out has to
+ * change with them: an officer looking at findings needs to know whether a
+ * model produced them or a fixture did, and a table that always claimed one or
+ * the other would be worse than no table.
+ */
+export function getIntegrationStatus(serviceUrl?: string | null): readonly ModuleIntegration[] {
+  const live = isUsingRealScreening(serviceUrl);
+
+  const wired = (
+    module: string,
+    implementation: string,
+    liveNote: string,
+  ): ModuleIntegration => ({
+    module,
+    state: live ? 'ACTIVE' : 'MOCK',
+    implementation: live ? implementation : `${implementation} — not reachable`,
+    note: live
+      ? liveNote
+      : 'No screening service is configured, so the app replays a generated document. Nothing here came from this capture.',
+  });
+
+  return [
+    wired(
+      'Field extraction (OCR/MRZ)',
+      'Phase_1: PP-LCNet orientation, U-Net detection, PP-OCRv5',
+      'The capture is detected, rectified and read by the extraction pipeline.',
+    ),
+    wired(
+      'Rule validation',
+      'backend/validation deterministic rule sets',
+      'Rules run against the fields extraction actually read from this document.',
+    ),
+    wired(
+      'Face verification',
+      'SCRFD detection + ArcFace R50 (buffalo_m)',
+      'Cosine similarity of the document portrait against the subject capture. Thresholds are the pipeline’s own calibrated values and remain provisional.',
+    ),
+    ...STATIC_INTEGRATION_STATUS,
+  ];
+}
+
+const STATIC_INTEGRATION_STATUS: readonly ModuleIntegration[] = [
   {
     module: 'Document forensics',
     state: 'MOCK',

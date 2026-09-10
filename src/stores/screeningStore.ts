@@ -8,6 +8,7 @@ import { getScreeningService } from '@/services/ai/registry';
 import type { StageEvent } from '@/services/ai/contracts';
 import { keyValueStore, mediaStore } from '@/services/storage';
 import { syncEngine } from '@/services/sync/syncEngine';
+import { useSettingsStore } from '@/stores/settingsStore';
 import {
   SCREENING_STAGE_ORDER,
   type AuthenticatedUser,
@@ -336,7 +337,12 @@ export const useScreeningStore = create<ScreeningState>((set, get) => {
         metadata: { documentType: current.documentType },
       });
 
-      const service = getScreeningService({ scenario: options.scenario });
+      // The address is read at call time rather than captured once, so an
+      // officer who corrects it in Settings does not have to restart the app.
+      const service = getScreeningService({
+        scenario: options.scenario,
+        serviceUrl: useSettingsStore.getState().screeningServiceUrl,
+      });
 
       try {
         const result = await service.screen({

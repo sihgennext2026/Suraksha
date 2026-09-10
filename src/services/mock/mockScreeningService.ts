@@ -1,16 +1,7 @@
-import type {
-  Envelope,
-  ModuleName,
-  ModuleStatus,
-  ScreeningCaseResult,
-} from '@/contracts';
-import { hasEvidence } from '@/contracts';
+import type { Envelope, ModuleName, ModuleStatus, ScreeningCaseResult } from '@/contracts';
 import { SCREENING_STAGE_DESCRIPTORS } from '@/constants/screening';
-import type {
-  ScreeningRequest,
-  ScreeningService,
-  StageEvent,
-} from '@/services/ai/contracts';
+import type { ScreeningRequest, ScreeningService } from '@/services/ai/contracts';
+import { detailFor, envelopeFor, stageStatusFor } from '@/services/ai/stageEvents';
 import { SCREENING_STAGE_ORDER, type ScreeningStageId } from '@/types/case';
 import { nowIso } from '@/utils/date';
 import { delay } from '@/utils/delay';
@@ -44,79 +35,6 @@ const STAGE_DURATION_MS: Record<ScreeningStageId, [number, number]> = {
   ANOMALY_ANALYSIS: [90, 160],
   RISK_ASSESSMENT: [300, 520],
 };
-
-/**
- * Maps a module envelope onto the stage indicator.
- *
- * This is presentation, not interpretation: WARNING means "this stage has
- * something for you to look at", and it is decided from the severity the fusion
- * engine already assigned, never re-derived from the payload.
- */
-function stageStatusFor(
-  envelope: Envelope<unknown> | null,
-  severity: string | undefined,
-): StageEvent['status'] {
-  if (!envelope) return 'COMPLETED';
-  if (envelope.status === 'NOT_AVAILABLE') return 'NOT_AVAILABLE';
-  if (envelope.status === 'FAILED') return 'FAILED';
-  if (envelope.status === 'PARTIAL') return 'WARNING';
-  return severity && severity !== 'NONE' ? 'WARNING' : 'COMPLETED';
-}
-
-function envelopeFor(
-  result: ScreeningCaseResult,
-  module: ModuleName | null,
-): Envelope<unknown> | null {
-  if (!module) return null;
-  return {
-    ocr: result.ocr,
-    validation: result.validation,
-    face_verification: result.face_verification,
-    document_forensics: result.document_forensics,
-    anomaly: result.anomaly,
-    risk: result.risk,
-  }[module] as Envelope<unknown>;
-}
-
-function detailFor(
-  result: ScreeningCaseResult,
-  stage: ScreeningStageId,
-  envelope: Envelope<unknown> | null,
-): { detail: string | null; error: string | null } {
-  if (envelope && (envelope.status === 'FAILED' || envelope.status === 'NOT_AVAILABLE')) {
-    return { detail: null, error: envelope.errors[0]?.message ?? null };
-  }
-
-  const module = SCREENING_STAGE_DESCRIPTORS[stage].module;
-  const item = result.evidence.find((entry) => entry.module === module);
-
-  if (stage === 'RISK_ASSESSMENT') {
-    const risk = hasEvidence(result.risk) ? result.risk.result : null;
-    return {
-      detail: risk ? `${risk.risk_level} · score ${risk.risk_score.toFixed(2)}` : null,
-      error: null,
-    };
-  }
-  if (stage === 'DOCUMENT_DETECTION') {
-    const ocr = hasEvidence(result.ocr) ? result.ocr.result : null;
-    return {
-      detail: ocr?.detection.detected
-        ? 'Document located in the frame'
-        : 'Document could not be located',
-      error: null,
-    };
-  }
-  if (stage === 'DOCUMENT_PROCESSING') {
-    const ocr = hasEvidence(result.ocr) ? result.ocr.result : null;
-    return {
-      detail: ocr?.detection.orientation_corrected
-        ? 'Orientation corrected and perspective rectified'
-        : 'Perspective rectified',
-      error: null,
-    };
-  }
-  return { detail: item?.detail ?? null, error: null };
-}
 
 export class MockScreeningService implements ScreeningService {
   /**

@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useCameraPermissions } from 'expo-camera';
@@ -15,7 +15,8 @@ import { ROLE_LABEL } from '@/constants/labels';
 import { LATEST_SCHEMA_VERSION } from '@/db/migrations';
 import { SystemStatusPanel } from '@/features/dashboard/components/SystemStatusPanel';
 import { useSystemStatus } from '@/features/dashboard/useSystemStatus';
-import { INTEGRATION_STATUS } from '@/services/ai/registry';
+import { getIntegrationStatus } from '@/services/ai/registry';
+import { selectScreeningServiceUrl, useSettingsStore } from '@/stores/settingsStore';
 import { authService } from '@/services/api/authService';
 import { useAuthStore } from '@/stores/authStore';
 import { useTheme } from '@/theme';
@@ -33,6 +34,8 @@ export function DeviceSetupScreen() {
   const deviceId = useAuthStore((state) => state.deviceId);
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const status = useSystemStatus();
+  const serviceUrl = useSettingsStore(selectScreeningServiceUrl);
+  const integrationStatus = useMemo(() => getIntegrationStatus(serviceUrl), [serviceUrl]);
 
   const officers = useQuery({
     queryKey: ['enrolled-officers'],
@@ -80,7 +83,7 @@ export function DeviceSetupScreen() {
           description="What each check is backed by on this device today."
         >
           <Panel padded={false}>
-            {INTEGRATION_STATUS.map((entry, index) => (
+            {integrationStatus.map((entry, index) => (
               <View
                 key={entry.module}
                 accessible
