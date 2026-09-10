@@ -16,6 +16,7 @@ jest.mock('expo-sqlite', () => ({
 }));
 
 import {
+  getDatabase,
   auditRepository,
   caseRepository,
   syncQueueRepository,
@@ -290,5 +291,22 @@ describe('user repository', () => {
     expect(found?.name).toBe('Krishna Raj');
     expect(found?.role).toBe('OFFICER');
     expect(await userRepository.listEnrolled()).toHaveLength(1);
+  });
+});
+
+describe('database connection', () => {
+  it('does not cache a failed open, so a later call can recover', async () => {
+    const { openDatabaseAsync } = jest.requireMock('expo-sqlite') as {
+      openDatabaseAsync: jest.Mock;
+    };
+    __resetDatabaseForTests(null);
+
+    openDatabaseAsync.mockRejectedValueOnce(new Error('database is locked'));
+    await expect(getDatabase()).rejects.toThrow('database is locked');
+
+    // A rejected promise left in the cache would be handed to every later
+    // caller for the life of the process, so a lock that clears in a second
+    // would still leave storage unusable until the app was reinstalled.
+    await expect(getDatabase()).resolves.toBe(mockDatabase);
   });
 });

@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import { hasEvidence, type DocumentType } from '@/contracts';
 import { STORAGE_KEYS } from '@/constants/storage';
 import { MODULE_LABELS } from '@/constants/screening';
-import { auditRepository, caseRepository } from '@/db';
+import { auditRepository, caseRepository, type RecordAuditInput } from '@/db';
 import { getScreeningService } from '@/services/ai/registry';
 import type { StageEvent } from '@/services/ai/contracts';
 import { keyValueStore, mediaStore } from '@/services/storage';
@@ -60,6 +60,34 @@ interface ScreeningState {
 }
 
 let screeningController: AbortController | null = null;
+
+/**
+ * Records an audit event without letting a storage fault strand the workflow.
+ *
+ * The audit trail matters, but it is written to the same database as everything
+ * else, and a rejected insert used to propagate straight out of the calling
+ * action. In `runScreening` that was unrecoverable: the throw landed after
+ * `running` had been set true but before the try block, so the progress
+ * indicator never stopped and the `if (get().running) return` guard refused
+ * every retry — a single failed write cost the officer the case and needed the
+ * app force-quit to clear.
+ *
+ * Recording is therefore best-effort, which is the same trade the case write
+ * already makes above: losing a write is recoverable, losing the subject at the
+ * counter is not. A dropped event is logged so the gap is visible.
+ */
+async function recordAudit(input: RecordAuditInput): Promise<void> {
+  try {
+    await auditRepository.record(input);
+  } catch (error) {
+    log.warn('Could not write an audit event', {
+      caseId: input.caseId,
+      type: input.type,
+      ok: false,
+    });
+    void error;
+  }
+}
 
 export function createInitialStages(): ScreeningStageState[] {
   return SCREENING_STAGE_ORDER.map((id) => ({
@@ -196,7 +224,7 @@ export const useScreeningStore = create<ScreeningState>((set, get) => {
       snapshotPhase(created.id, 'DOCUMENT_TYPE');
 
       await caseRepository.save(created);
-      await auditRepository.record({
+      await recordAudit({
         caseId: created.id,
         type: 'CASE_CREATED',
         description: `Case ${reference} opened`,
@@ -213,7 +241,7 @@ export const useScreeningStore = create<ScreeningState>((set, get) => {
         'DOCUMENT_CAPTURE',
       );
       if (!next) return;
-      await auditRepository.record({
+      await recordAudit({
         caseId: next.id,
         type: 'DOCUMENT_TYPE_SELECTED',
         description: `Document type set to ${type.replace(/_/g, ' ')} by the officer`,
@@ -243,7 +271,7 @@ export const useScreeningStore = create<ScreeningState>((set, get) => {
       );
       if (!next) return;
 
-      await auditRepository.record({
+      await recordAudit({
         caseId: next.id,
         type: 'DOCUMENT_CAPTURED',
         description: `Document captured from ${
@@ -273,7 +301,7 @@ export const useScreeningStore = create<ScreeningState>((set, get) => {
       );
       if (!next) return;
 
-      await auditRepository.record({
+      await recordAudit({
         caseId: next.id,
         type: 'PERSON_CAPTURED',
         description: 'Subject photograph captured',
@@ -299,7 +327,7 @@ export const useScreeningStore = create<ScreeningState>((set, get) => {
       });
       snapshotPhase(current.id, 'SCREENING');
 
-      await auditRepository.record({
+      await recordAudit({
         caseId: current.id,
         type: 'SCREENING_STARTED',
         description: 'Screening started',
@@ -344,7 +372,7 @@ export const useScreeningStore = create<ScreeningState>((set, get) => {
         }
         const failure = toServiceFailure(error);
         set({ running: false, error: failure.message, phase: 'SCREENING' });
-        await auditRepository.record({
+        await recordAudit({
           caseId: current.id,
           type: 'SCREENING_FAILED',
           description: 'The screening service could not be reached',
@@ -393,7 +421,7 @@ export const useScreeningStore = create<ScreeningState>((set, get) => {
       );
       if (!next?.decision) return;
 
-      await auditRepository.record({
+      await recordAudit({
         caseId: next.id,
         type: 'OFFICER_DECISION',
         description: `Officer recorded the decision: ${decisionDescription(decision)}`,
@@ -416,7 +444,7 @@ export const useScreeningStore = create<ScreeningState>((set, get) => {
       set({ saving: true, saveError: null });
       try {
         await caseRepository.save(current);
-        await auditRepository.record({
+        await recordAudit({
           caseId: current.id,
           type: 'CASE_SAVED',
           description: 'Case committed to this device',
@@ -467,7 +495,7 @@ export const useScreeningStore = create<ScreeningState>((set, get) => {
         // that a screening was started, and deleting the row would cascade it
         // away.
         await caseRepository.save({ ...current, status: 'ABANDONED', updatedAt: nowIso() });
-        await auditRepository.record({
+        await recordAudit({
           caseId: current.id,
           type: 'CASE_ABANDONED',
           description: `Case ${current.id} abandoned before a decision was recorded`,
@@ -552,7 +580,7 @@ async function recordModuleAudit(screeningCase: ScreeningCase): Promise<void> {
     const label = MODULE_LABELS[entry.module];
 
     if (envelope.status === 'NOT_AVAILABLE' || envelope.status === 'FAILED') {
-      await auditRepository.record({
+      await recordAudit({
         caseId,
         type: 'MODULE_UNAVAILABLE',
         description: `${label} did not run: ${envelope.errors[0]?.message ?? 'no reason given'}`,
@@ -562,7 +590,7 @@ async function recordModuleAudit(screeningCase: ScreeningCase): Promise<void> {
       continue;
     }
 
-    await auditRepository.record({
+    await recordAudit({
       caseId,
       type: entry.type,
       description: `${label}: ${item?.detail ?? 'completed'}`,

@@ -1,4 +1,5 @@
 import type { DocumentType, ScreeningCaseResult } from '@/contracts';
+import { DOCUMENT_TYPE_DESCRIPTORS } from '@/constants/documents';
 
 import allModulesDown from '@/fixtures/screening/all-modules-down.json';
 import faceFailed from '@/fixtures/screening/face-failed.json';
@@ -69,11 +70,38 @@ export function fixtureById(id: string): ScreeningFixture | undefined {
  * matches the officer's declared type are preferred, so a passport screening
  * never plays back a national identity card's findings.
  */
+/**
+ * Which fixtures may stand in for a declared document type.
+ *
+ * Falling back to the whole set was wrong in two ways. A type no backend module
+ * supports could replay a passport's findings, showing the officer confident MRZ
+ * check digits for a document that was never parsed — the exact "borrowing
+ * another type's rules" that DOCUMENT_TYPE_DESCRIPTORS says must not happen. And
+ * a supported type with no fixture of its own, such as a driving licence, could
+ * replay a passport's machine-readable zone even though the card has none.
+ */
+function poolFor(documentType: DocumentType): readonly ScreeningFixture[] {
+  const descriptor = DOCUMENT_TYPE_DESCRIPTORS[documentType];
+
+  if (!descriptor.backendSupported) {
+    const unsupported = fixtureById('unsupported-document-type');
+    if (unsupported) return [unsupported];
+  }
+
+  const exact = FIXTURES.filter((fixture) => fixture.result.document_type === documentType);
+  if (exact.length > 0) return exact;
+
+  // No fixture for this type: stand in only for one that carries the same
+  // machine-readable zone characteristic, and that a backend module supports.
+  const comparable = FIXTURES.filter((fixture) => {
+    const other = DOCUMENT_TYPE_DESCRIPTORS[fixture.result.document_type];
+    return other.backendSupported && other.hasMrz === descriptor.hasMrz;
+  });
+  return comparable.length > 0 ? comparable : FIXTURES;
+}
+
 export function selectFixture(caseId: string, documentType: DocumentType): ScreeningFixture {
-  const matching = FIXTURES.filter(
-    (fixture) => fixture.result.document_type === documentType,
-  );
-  const pool = matching.length > 0 ? matching : FIXTURES;
+  const pool = poolFor(documentType);
 
   let hash = 0;
   for (let index = 0; index < caseId.length; index += 1) {

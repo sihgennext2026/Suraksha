@@ -367,3 +367,64 @@ describe('offline behaviour', () => {
     expect((await caseRepository.findById(created.id))?.sync.state).toBe('SYNCED');
   }, 30_000);
 });
+
+describe('reliability of the screening run', () => {
+  it('still completes the screening when the audit trail cannot be written', async () => {
+    const user = await signIn();
+
+    // The audit trail shares a database with everything else, so a disk fault
+    // hits it too. It must not take the screening down with it: this used to
+    // throw out of `runScreening` after `running` had been set, leaving a
+    // progress indicator that never stopped and a guard that refused a retry.
+    const record = jest
+      .spyOn(auditRepository, 'record')
+      .mockRejectedValue(new Error('database or disk is full'));
+
+    try {
+      await runFullScreening(user);
+    } finally {
+      record.mockRestore();
+    }
+
+    const state = useScreeningStore.getState();
+    expect(state.running).toBe(false);
+    expect(state.error).toBeNull();
+    expect(state.phase).toBe('RESULT');
+    // The officer still has findings to act on, which is the point.
+    expect(state.activeCase?.result).not.toBeNull();
+    expect(state.activeCase?.status).toBe('AWAITING_DECISION');
+  }, 30_000);
+});
+
+describe('fixture selection for a declared document type', () => {
+  it('never borrows a parsed document’s findings for an unsupported type', async () => {
+    const user = await signIn();
+    // No scenario is forced here: this is the path an officer actually takes,
+    // and 'other' has no fixture of its own, so it exercises the fallback.
+    await runFullScreening(user, { documentType: 'other' });
+
+    const result = useScreeningStore.getState().activeCase?.result;
+    expect(result?.document_type).toBe('other');
+    // The modules must report that they did not run, not a passport's verdicts.
+    expect(result?.ocr.status).toBe('NOT_AVAILABLE');
+    expect(result?.validation.status).toBe('NOT_AVAILABLE');
+    expect(result?.validation.result).toBeNull();
+  }, 30_000);
+
+  it('does not replay a machine-readable zone for a card that has none', async () => {
+    const user = await signIn();
+    await runFullScreening(user, { documentType: 'driving_license' });
+
+    const result = useScreeningStore.getState().activeCase?.result;
+    expect(result?.document_type).toBe('driving_license');
+    // A driving licence carries no MRZ, so standing in a passport's check-digit
+    // findings would put fabricated evidence in front of the officer. The
+    // licence is a backend-supported type, so extraction must have produced
+    // evidence — asserting that first keeps this from passing vacuously.
+    const ocr = result?.ocr;
+    if (!ocr || !hasEvidence(ocr)) {
+      throw new Error('A supported document type should still produce OCR evidence');
+    }
+    expect(ocr.result.mrz?.present ?? false).toBe(false);
+  }, 30_000);
+});

@@ -18,6 +18,15 @@ import { createLogger } from '@/utils/logger';
 
 const log = createLogger('boot');
 
+/**
+ * Expo Router only wraps a route in an error boundary when that route exports
+ * one. Without this, a render-time exception anywhere in the tree unwinds past
+ * the navigator and leaves a blank screen with no way back — which, mid-
+ * screening, strands the officer on an unsaved case. Re-exporting the built-in
+ * boundary turns that into a readable error with a retry.
+ */
+export { ErrorBoundary } from 'expo-router';
+
 void SplashScreen.preventAutoHideAsync();
 
 /**

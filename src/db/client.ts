@@ -16,7 +16,15 @@ let databasePromise: Promise<SQLiteDatabase> | null = null;
  * cannot execute twice if several repositories initialise at the same moment.
  */
 export function getDatabase(): Promise<SQLiteDatabase> {
-  databasePromise ??= open();
+  databasePromise ??= open().catch((error: unknown) => {
+    // Drop the cached promise on failure. A rejected promise left in place
+    // would be handed to every later caller for the life of the process, so a
+    // fault a retry could clear — a lock held by a dying write, a transient
+    // filesystem error — would instead leave storage unusable until the app was
+    // reinstalled, taking the officer's queued cases with it.
+    databasePromise = null;
+    throw error;
+  });
   return databasePromise;
 }
 
@@ -37,10 +45,16 @@ async function migrate(db: SQLiteDatabase): Promise<void> {
   for (const migration of MIGRATIONS) {
     if (migration.version <= current) continue;
     log.info('Applying migration', { version: migration.version, name: migration.name });
-    await migration.up(db);
-    // PRAGMA does not accept bound parameters, and the value is an integer
-    // literal from our own migration list rather than user input.
-    await db.execAsync(`PRAGMA user_version = ${migration.version}`);
+    // The schema change and the version bump that records it commit together.
+    // Applied separately, a failure between them would leave the database
+    // migrated but still advertising the older version, and the next launch
+    // would replay a migration against a schema that had already moved.
+    await db.withTransactionAsync(async () => {
+      await migration.up(db);
+      // PRAGMA does not accept bound parameters, and the value is an integer
+      // literal from our own migration list rather than user input.
+      await db.execAsync(`PRAGMA user_version = ${migration.version}`);
+    });
   }
 }
 
