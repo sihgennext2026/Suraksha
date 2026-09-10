@@ -13,6 +13,18 @@ import Constants from 'expo-constants';
  * TODO(production): this address belongs in device management, provisioned per
  * post, not typed in by an officer. Runtime configuration exists here so a
  * demonstration can follow a laptop's address around a network.
+ *
+ * SECURITY — the build sets `android:usesCleartextTraffic="true"`, without
+ * which Android 9 and later refuse an `http://` request before it leaves the
+ * device, and a screening fails with no packet ever reaching the service. The
+ * service speaks plain HTTP on a post's local network, and Android's network
+ * security config can only exempt named hosts, not private address ranges, so
+ * an address that changes with the network cannot be allowlisted.
+ *
+ * TODO(production): this must not ship as-is. Captures of a subject's face and
+ * identity document currently cross the local network unencrypted and
+ * unauthenticated. Serve the screening service over TLS with a certificate
+ * pinned by device management, then remove the cleartext permission.
  */
 
 function fromExpoConfig(): string | null {

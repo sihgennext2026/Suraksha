@@ -1,18 +1,19 @@
 """
 Imports the three existing pipelines into one process.
 
-Phase_1 and backend/validation both ship a top-level package literally named
-`app`, so putting both on `sys.path` makes the second one unreachable — whichever
-lands in `sys.modules` first wins, and the loser's submodules silently resolve
-against the winner. That is why this module exists rather than a couple of
-`sys.path.insert` calls.
+The extraction and validation services both ship a top-level package literally
+named `app`, so putting both on `sys.path` makes the second one unreachable —
+whichever lands in `sys.modules` first wins, and the loser's submodules silently
+resolve against the winner. That is why this module exists rather than a couple
+of `sys.path.insert` calls.
 
 The two are loaded differently because they are written differently:
 
-  * Phase_1 uses relative imports throughout (`from . import config`), so its
-    package can be bound under any name. It is loaded as `phase1`, and its
-    submodules become `phase1.main`, `phase1.ocr`, and so on.
-  * backend/validation uses absolute imports (`from app.extractors import ...`),
+  * services/extraction uses relative imports throughout (`from . import
+    config`), so its package can be bound under any name. It is loaded as
+    `extraction_service`, and its submodules become `extraction_service.main`,
+    `extraction_service.ocr`, and so on.
+  * services/validation uses absolute imports (`from app.extractors import ...`),
     so it must keep the name `app`. It gets the real `sys.path` entry.
 
 Neither repository is modified. This is the whole of the coupling between them.
@@ -28,14 +29,15 @@ from types import ModuleType
 
 #: Repository root — services/screening-api/ssb_screening_api/loader.py
 REPO_ROOT = Path(__file__).resolve().parents[3]
+SERVICES_ROOT = REPO_ROOT / "services"
 
-PHASE1_ROOT = REPO_ROOT / "Phase_1"
-VALIDATION_ROOT = REPO_ROOT / "backend" / "validation"
-FACEVERIFY_ROOT = REPO_ROOT / "gowtham-pepline" / "src"
+EXTRACTION_ROOT = SERVICES_ROOT / "extraction"
+VALIDATION_ROOT = SERVICES_ROOT / "validation"
+FACEVERIFY_ROOT = SERVICES_ROOT / "face-verification" / "src"
 CONTRACTS_ROOT = REPO_ROOT / "contracts" / "python"
 
-#: The name Phase_1's `app` package is rebound to inside this process.
-PHASE1_ALIAS = "phase1"
+#: The name the extraction service's `app` package is rebound to in-process.
+EXTRACTION_ALIAS = "extraction_service"
 
 
 class ModuleUnavailable(RuntimeError):
@@ -55,22 +57,23 @@ def _ensure_path(path: Path) -> None:
         sys.path.insert(0, entry)
 
 
-def load_phase1() -> ModuleType:
+def load_extraction() -> ModuleType:
     """
-    Binds `Phase_1/app` as the `phase1` package and returns `phase1.main`.
+    Binds `services/extraction/app` as `extraction_service` and returns its
+    `main` module.
 
     Relative imports resolve against `__package__`, which the alias sets, so
-    `from .detector import DocumentDetector` inside Phase_1 becomes
-    `phase1.detector` and never touches the validation service's `app`.
+    `from .detector import DocumentDetector` inside the extraction service
+    becomes `extraction_service.detector` and never touches validation's `app`.
     """
-    if PHASE1_ALIAS not in sys.modules:
-        package_dir = PHASE1_ROOT / "app"
+    if EXTRACTION_ALIAS not in sys.modules:
+        package_dir = EXTRACTION_ROOT / "app"
         init = package_dir / "__init__.py"
         if not init.is_file():
-            raise ModuleUnavailable(f"Phase_1 package not found at {package_dir}")
+            raise ModuleUnavailable(f"Extraction package not found at {package_dir}")
 
         spec = importlib.util.spec_from_file_location(
-            PHASE1_ALIAS,
+            EXTRACTION_ALIAS,
             init,
             submodule_search_locations=[str(package_dir)],
         )
@@ -80,19 +83,20 @@ def load_phase1() -> ModuleType:
         package = importlib.util.module_from_spec(spec)
         # Registered before execution so that a submodule importing its own
         # package during exec_module finds it rather than recursing.
-        sys.modules[PHASE1_ALIAS] = package
+        sys.modules[EXTRACTION_ALIAS] = package
         try:
             spec.loader.exec_module(package)
         except Exception:
-            del sys.modules[PHASE1_ALIAS]
+            del sys.modules[EXTRACTION_ALIAS]
             raise
 
-    return importlib.import_module(f"{PHASE1_ALIAS}.main")
+    return importlib.import_module(f"{EXTRACTION_ALIAS}.main")
 
 
 def load_validation() -> tuple[ModuleType, ModuleType, Path]:
     """
-    Returns `(get_extractor, DocumentValidator, rules_dir)` from backend/validation.
+    Returns `(get_extractor, DocumentValidator, rules_dir)` from the validation
+    service.
 
     The rules directory is passed explicitly rather than left to the validator's
     default, because the default is relative to the validator's own file and

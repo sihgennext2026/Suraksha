@@ -1,7 +1,10 @@
 import type { ScreeningCaseResult } from '@/contracts';
 import { SCREENING_STAGE_ORDER } from '@/types/case';
+import { ScreeningServiceError } from '@/types';
 import { AbortError } from '@/utils/delay';
 import { createLogger } from '@/utils/logger';
+
+import { failure } from '@/utils/errors';
 
 import type { ScreeningRequest, ScreeningService } from './contracts';
 import { stageEventsFor } from './stageEvents';
@@ -68,9 +71,14 @@ export class HttpScreeningService implements ScreeningService {
 
       if (!response.ok) {
         const detail = await response.text().catch(() => '');
-        throw new ScreeningServiceError(
+        log.warn('Screening service rejected the request', {
+          status: response.status,
+          ok: false,
+        });
+        void detail;
+        throw failure(
+          'SERVICE_REJECTED',
           `The screening service rejected the request (${response.status}).`,
-          detail,
         );
       }
 
@@ -80,32 +88,18 @@ export class HttpScreeningService implements ScreeningService {
     } catch (error) {
       if (request.signal?.aborted) throw new AbortError();
       if (controller.signal.aborted) {
-        throw new ScreeningServiceError(
-          'The screening service did not respond in time.',
-          `timeout after ${this.timeoutMs}ms`,
-        );
+        throw failure('SERVICE_TIMEOUT', 'The screening service did not respond in time.');
       }
       if (error instanceof ScreeningServiceError) throw error;
       log.warn('Screening request failed', { ok: false });
-      throw new ScreeningServiceError(
-        'The screening service could not be reached.',
-        error instanceof Error ? error.message : String(error),
+      throw failure(
+        'SERVICE_UNREACHABLE',
+        'The screening service could not be reached. Check the address in Settings and that the phone is on the same network.',
       );
     } finally {
       clearTimeout(timeout);
       request.signal?.removeEventListener('abort', abort);
     }
-  }
-}
-
-/** Carries an officer-safe message; `detail` is for logs only. */
-export class ScreeningServiceError extends Error {
-  readonly detail: string;
-
-  constructor(message: string, detail: string) {
-    super(message);
-    this.name = 'ScreeningServiceError';
-    this.detail = detail;
   }
 }
 

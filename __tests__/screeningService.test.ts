@@ -1,7 +1,8 @@
 import type { ScreeningCaseResult } from '@/contracts';
+import { ScreeningServiceError } from '@/types';
 import type { CapturedImage } from '@/types/document';
 import { normaliseServiceUrl, resolveScreeningServiceUrl } from '@/config/screeningService';
-import { HttpScreeningService, ScreeningServiceError } from '@/services/ai/httpScreeningService';
+import { HttpScreeningService } from '@/services/ai/httpScreeningService';
 import { getScreeningService, isUsingRealScreening } from '@/services/ai/registry';
 import { MockScreeningService } from '@/services/mock/mockScreeningService';
 import { SCREENING_STAGE_ORDER } from '@/types/case';
@@ -149,7 +150,11 @@ describe('http screening service', () => {
     fetchMock.mockRejectedValue(new Error('Network request failed'));
     const service = new HttpScreeningService({ baseUrl: 'http://10.0.0.5:8000' });
 
+    // Must be the application's own error type: `toServiceFailure` recognises
+    // it by `instanceof`, and a look-alike class would leave the officer with a
+    // generic "something went wrong" instead of the reason and the fix.
     await expect(service.screen(buildRequest())).rejects.toBeInstanceOf(ScreeningServiceError);
+    await expect(service.screen(buildRequest())).rejects.toThrow(/could not be reached/i);
   });
 
   it('raises on a rejected request rather than treating it as a clear result', async () => {

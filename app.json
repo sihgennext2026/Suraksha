@@ -59,6 +59,7 @@
           "recordAudioAndroid": false
         }
       ],
+      "./plugins/withCleartextTraffic",
       "./plugins/withReleaseSigning"
     ],
     "experiments": {

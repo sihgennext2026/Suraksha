@@ -1,19 +1,19 @@
 """
-Adapter: Phase_1 extraction service -> canonical contract.
+Adapter: services/extraction extraction service -> canonical contract.
 
-Phase_1 is the stronger of the two OCR implementations in the repository
+services/extraction is the stronger of the two OCR implementations in the repository
 (orientation correction, U-Net segmentation, multilingual PP-OCRv5, structured
 field extraction with per-field provenance) and is treated as the active one.
-`backend/extraction` covers a subset of the same ground and is not adapted here.
+`reference/extraction-experiments` covers a subset of the same ground and is not adapted here.
 
 Two things this adapter is careful about:
 
-Phase_1 returns `detection_box` in PIXELS in the corrected image's frame, while
+services/extraction returns `detection_box` in PIXELS in the corrected image's frame, while
 the contract carries normalised coordinates so a consumer can draw a region
 without also transporting the image dimensions. If the caller does not supply
 those dimensions the box is omitted rather than guessed.
 
-Phase_1 deliberately does not parse or validate the MRZ - it returns raw lines
+services/extraction deliberately does not parse or validate the MRZ - it returns raw lines
 and leaves decoding to the validation module. `checksum_valid` is therefore left
 null here, meaning "not evaluated at this stage", which is distinct from false.
 """
@@ -52,7 +52,7 @@ def _normalise_box(
     box: Optional[Sequence[float]], image_size: Optional[Tuple[int, int]]
 ) -> Optional[List[float]]:
     """
-    Phase_1's `[x1, y1, x2, y2]` in pixels -> contract `[x, y, w, h]` in 0..1.
+    the extraction service's `[x1, y1, x2, y2]` in pixels -> contract `[x, y, w, h]` in 0..1.
 
     Returns None when the image dimensions are unknown; a box in the wrong units
     would be drawn in the wrong place, which is worse than drawing none.
@@ -89,7 +89,7 @@ def from_extract_response(
     image_size: Optional[Tuple[int, int]] = None,
     model_version: str = OCR_MODEL_VERSION,
 ) -> Envelope:
-    """`response` is the JSON body of Phase_1's `POST /extract`."""
+    """`response` is the JSON body of the extraction service's `POST /extract`."""
     supported, reason = supports(Module.OCR, document_type)
     if not supported:
         return not_available(
@@ -114,7 +114,7 @@ def from_extract_response(
     fields = [
         OcrField(
             key=key,
-            # Phase_1 leaves a field null when it is absent from this document
+            # services/extraction leaves a field null when it is absent from this document
             # type or could not be found. That null is carried through rather
             # than being replaced with an empty string.
             value=value,
@@ -129,7 +129,7 @@ def from_extract_response(
         format="TD3" if document_type is DocumentType.PASSPORT and mrz_lines else "NONE",
         lines=mrz_lines,
         check_digits=[],
-        # Not evaluated at this stage - Phase_1 does no MRZ decoding by design.
+        # Not evaluated at this stage - services/extraction does no MRZ decoding by design.
         # Distinct from False, which would assert the checksum had been tested
         # and had failed.
         checksum_valid=None,

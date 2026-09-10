@@ -29,7 +29,7 @@ from ssb_contracts import (
     success,
     supports,
 )
-from ssb_contracts.adapters import face_arcface, ocr_phase1, validation_backend
+from ssb_contracts.adapters import face_arcface, ocr_extraction, validation_rules
 from ssb_contracts.modules import (
     CheckStatus,
     FaceDecision,
@@ -84,14 +84,14 @@ def validation_envelope(*statuses: CheckStatus):
         )
         for index, status in enumerate(statuses)
     ]
-    result = validation_backend.build_result(checks)
+    result = validation_rules.build_result(checks)
     return success(
-        CASE, Module.VALIDATION, validation_backend.RULE_ENGINE_VERSION, result.to_dict()
+        CASE, Module.VALIDATION, validation_rules.RULE_ENGINE_VERSION, result.to_dict()
     )
 
 
 def ocr_envelope(*, detected: bool = True, confidence: float = 0.96):
-    return ocr_phase1.from_extract_response(
+    return ocr_extraction.from_extract_response(
         CASE,
         DocumentType.PASSPORT,
         {
@@ -190,7 +190,7 @@ class TestDocumentTypes:
         assert not val_ok and val_reason
 
     def test_other_never_borrows_another_types_rules(self):
-        envelope = validation_backend.from_validator_output(
+        envelope = validation_rules.from_validator_output(
             CASE, DocumentType.OTHER, {"rules": [{"metric": "x", "status": "PASS"}]}
         )
         # Even with rules supplied, an unsupported type returns NOT_AVAILABLE
@@ -216,7 +216,7 @@ class TestDocumentTypes:
 class TestFaceVerification:
     def test_thresholds_come_from_the_shared_configuration(self):
         thresholds = load_thresholds().face
-        # These are the values gowtham-pepline actually classifies with. The old
+        # These are the values services/face-verification actually classifies with. The old
         # React Native assumptions (0.85 / 0.60) were on a different scale.
         assert thresholds.match == 0.30
         assert thresholds.review == 0.14
@@ -288,7 +288,7 @@ class TestValidation:
         assert result["summary"]["not_available"] == 1
 
     def test_an_unknown_upstream_status_is_never_guessed_into_pass(self):
-        envelope = validation_backend.from_validator_output(
+        envelope = validation_rules.from_validator_output(
             CASE,
             DocumentType.PASSPORT,
             {"rules": [{"metric": "mystery", "status": "SOMETHING_NEW"}]},
@@ -296,7 +296,7 @@ class TestValidation:
         assert envelope.result["checks"][0]["status"] == CheckStatus.NOT_AVAILABLE.value
 
     def test_upstream_vocabulary_is_mapped_faithfully(self):
-        envelope = validation_backend.from_validator_output(
+        envelope = validation_rules.from_validator_output(
             CASE,
             DocumentType.PASSPORT,
             {
@@ -327,7 +327,7 @@ class TestOcr:
         assert box == [0.01, 0.02, 0.2, 0.3]
 
     def test_a_box_is_omitted_rather_than_guessed_without_image_dimensions(self):
-        envelope = ocr_phase1.from_extract_response(
+        envelope = ocr_extraction.from_extract_response(
             CASE,
             DocumentType.PASSPORT,
             {"detected": True, "detection_box": [10, 20, 210, 320]},
@@ -340,7 +340,7 @@ class TestOcr:
         assert mrz["checksum_valid"] is None, "null must not become false"
 
     def test_a_non_mrz_document_reports_no_zone(self):
-        envelope = ocr_phase1.from_extract_response(
+        envelope = ocr_extraction.from_extract_response(
             CASE,
             DocumentType.DRIVING_LICENSE,
             {"detected": True, "mrz_lines": ["SHOULD", "NOT", "HAPPEN"]},
@@ -518,7 +518,7 @@ class TestRiskFusion:
 
     def test_coverage_is_reported_and_thin_evidence_cannot_clear(self):
         risk = fuse(
-            ocr=ocr_phase1.from_failure(CASE, "OCR_DOWN", "Extraction unavailable."),
+            ocr=ocr_extraction.from_failure(CASE, "OCR_DOWN", "Extraction unavailable."),
             validation=not_available(CASE, Module.VALIDATION, "X", "unavailable"),
             face_verification=face_arcface.from_failure(CASE, "X", "unavailable"),
             document_forensics=forensics_envelope(ForensicsScenario.SERVICE_FAILURE),

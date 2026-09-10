@@ -110,7 +110,7 @@
 
     "ocrResult": {
       "type": "object",
-      "description": "Structured document data extracted by the OCR service (Phase_1: orientation -> segmentation -> perspective -> PP-OCRv5 -> field extraction).",
+      "description": "Structured document data extracted by the OCR service (services/extraction: orientation -> segmentation -> perspective -> PP-OCRv5 -> field extraction).",
       "required": ["document_type", "fields", "mrz", "detection", "overall_confidence"],
       "properties": {
         "document_type": { "$ref": "#/$defs/documentType" },

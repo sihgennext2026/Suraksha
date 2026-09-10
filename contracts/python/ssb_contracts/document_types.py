@@ -2,8 +2,8 @@
 Canonical document type, and which modules can actually process each one.
 
 Before this file the four components disagreed: the React Native app used
-`DRIVING_LICENCE` and offered seven types, Phase_1's OCR enum offered five with
-`DRIVING_LICENSE`, and backend/validation shipped rule files for the same five.
+`DRIVING_LICENCE` and offered seven types, the extraction service's OCR enum offered five with
+`DRIVING_LICENSE`, and services/validation shipped rule files for the same five.
 The canonical spelling follows the Python services, because they are the ones
 with rule files and model behaviour keyed to it.
 
@@ -34,7 +34,7 @@ class DocumentType(str, Enum):
     OTHER = "other"
 
 
-#: Types the OCR service (Phase_1) has a field schema and language mapping for.
+#: Types the OCR service (services/extraction) has a field schema and language mapping for.
 OCR_SUPPORTED = frozenset(
     {
         DocumentType.PASSPORT,
@@ -45,11 +45,11 @@ OCR_SUPPORTED = frozenset(
     }
 )
 
-#: Types that carry an ICAO 9303 machine-readable zone. Phase_1 documents this
+#: Types that carry an ICAO 9303 machine-readable zone. services/extraction documents this
 #: explicitly: an MRZ band must not be cropped from any other type.
 MRZ_BEARING = frozenset({DocumentType.PASSPORT, DocumentType.VISA})
 
-#: Types backend/validation ships a rules file for (app/rules/*.json).
+#: Types services/validation ships a rules file for (app/rules/*.json).
 VALIDATION_SUPPORTED = frozenset(
     {
         DocumentType.PASSPORT,

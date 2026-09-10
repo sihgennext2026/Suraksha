@@ -46,7 +46,7 @@ FORENSICS_NOT_IMPLEMENTED = (
 @dataclass
 class OcrOutcome:
     """
-    The extraction envelope, plus the raw Phase_1 body it came from.
+    The extraction envelope, plus the raw extraction body it came from.
 
     Validation needs the extracted text, and the envelope deliberately does not
     carry it — the canonical `OcrResult` is a curated view, not a transport for
@@ -85,10 +85,10 @@ class ModuleAvailability:
         }
 
 
-#: Phase_1's field names, translated to the vocabulary the rule sets use.
+#: The extraction service's field names, translated to the vocabulary the rule sets use.
 #:
 #: The two modules were written independently and name the same things
-#: differently — Phase_1 calls a passport's number `document_number`, the
+#: differently — Extraction calls a passport's number `document_number`, the
 #: passport rule set calls it `passport_number`. Something has to translate, and
 #: a rename table is the honest form for it: every entry is a synonym, none
 #: derives, combines or reinterprets a value.
@@ -123,9 +123,9 @@ _PER_TYPE_FIELD_NAMES: Dict[str, Dict[str, str]] = {
 
 def _validation_fields(document_type_value: str, response: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Translates Phase_1's extracted fields into the rule sets' vocabulary.
+    Translates the extraction service's fields into the rule sets' vocabulary.
 
-    Phase_1 has already done extraction — MRZ decoding for passports and visas,
+    Extraction has already run — MRZ decoding for passports and visas,
     label matching over the OCR lines otherwise — and its `structured_fields` is
     that result. Handing the raw lines to the validation service's own extractor
     instead would run a second, weaker extraction over the same evidence and
@@ -207,8 +207,8 @@ class ScreeningPipeline:
         self.adapters = adapters
         self.availability = ModuleAvailability()
 
-        self._phase1 = None
-        self._phase1_lifespan = None
+        self._extraction = None
+        self._extraction_lifespan = None
         self._extractors = None
         self._validator_module = None
         self._rules_dir: Optional[Path] = None
@@ -226,14 +226,15 @@ class ScreeningPipeline:
         still runs.
         """
         try:
-            self._phase1 = loader.load_phase1()
-            # Phase_1 loads its models in a FastAPI lifespan hook rather than at
-            # import, so entering that context is what makes /extract usable.
-            self._phase1_lifespan = self._phase1.lifespan(self._phase1.app)
-            await self._phase1_lifespan.__aenter__()
-            log.info("Extraction pipeline ready (Phase_1)")
+            self._extraction = loader.load_extraction()
+            # The extraction service loads its models in a FastAPI lifespan hook
+            # rather than at import, so entering that context is what makes
+            # /extract usable.
+            self._extraction_lifespan = self._extraction.lifespan(self._extraction.app)
+            await self._extraction_lifespan.__aenter__()
+            log.info("Extraction pipeline ready")
         except Exception as error:
-            self._phase1 = None
+            self._extraction = None
             self.availability.ocr = f"{type(error).__name__}: {error}"
             log.warning("Extraction pipeline unavailable: %s", error)
 
@@ -255,20 +256,20 @@ class ScreeningPipeline:
             log.warning("Face verification unavailable: %s", error)
 
     async def stop(self) -> None:
-        if self._phase1_lifespan is not None:
+        if self._extraction_lifespan is not None:
             try:
-                await self._phase1_lifespan.__aexit__(None, None, None)
+                await self._extraction_lifespan.__aexit__(None, None, None)
             except Exception:  # pragma: no cover - shutdown best effort
-                log.warning("Phase_1 shutdown did not complete cleanly")
-            self._phase1_lifespan = None
+                log.warning("Extraction shutdown did not complete cleanly")
+            self._extraction_lifespan = None
 
     # -- modules ---------------------------------------------------------
 
     async def _run_ocr(self, case_id: str, document_type: Any, image: bytes) -> "OcrOutcome":
-        """Phase_1: orientation, U-Net detection, perspective warp, PP-OCRv5, MRZ/QR."""
-        adapter = self.adapters.ocr_phase1
+        """Extraction: orientation, U-Net detection, perspective warp, PP-OCRv5, MRZ/QR."""
+        adapter = self.adapters.ocr_extraction
 
-        if self._phase1 is None:
+        if self._extraction is None:
             return OcrOutcome(
                 adapter.from_failure(
                     case_id=case_id,
@@ -289,10 +290,10 @@ class ScreeningPipeline:
             from fastapi import UploadFile
 
             upload = UploadFile(filename="document.jpg", file=io.BytesIO(image))
-            phase1_type = self._phase1.DocumentType(document_type.value)
-            response = await self._phase1.extract(
+            upstream_type = self._extraction.DocumentType(document_type.value)
+            response = await self._extraction.extract(
                 file=upload,
-                document_type=phase1_type,
+                document_type=upstream_type,
                 save_debug=False,
                 assume_precropped=False,
             )
@@ -310,8 +311,8 @@ class ScreeningPipeline:
             )
 
     def _run_validation(self, case_id: str, document_type: Any, ocr: "OcrOutcome") -> Any:
-        """backend/validation: deterministic rules over the extracted fields."""
-        adapter = self.adapters.validation_backend
+        """services/validation: deterministic rules over the extracted fields."""
+        adapter = self.adapters.validation_rules
 
         if self._validator_module is None:
             return adapter.unavailable(

@@ -17,9 +17,9 @@ capture
   → perspective correction             homography warp from the mask's 4 corners
   → MRZ band / field region split      passport and visa only
   → text recognition                   PP-OCRv5, language resolved per document
-  → MRZ decode + field extraction      Phase_1/app/field_extractor.py
+  → MRZ decode + field extraction      services/extraction/app/field_extractor.py
   → QR / barcode                       zxing-cpp, OpenCV fallback
-  → rule validation                    backend/validation deterministic rule sets
+  → rule validation                    services/validation deterministic rule sets
   → document portrait extraction       SCRFD
   → five-point alignment               faceverify/alignment.py
   → face embedding                     ArcFace R50 (buffalo_m/w600k_r50.onnx)
@@ -77,15 +77,16 @@ on the first inference of the orientation model. Neither `FLAGS_use_mkldnn=0`
 nor `FLAGS_enable_pir_api=0` avoids it, because PaddleX sets the predictor's
 oneDNN option itself. 3.0.0 runs the same graphs correctly.
 
-## How the three repositories are loaded
+## How the three services are loaded
 
-`Phase_1` and `backend/validation` both ship a top-level package named `app`, so
-they cannot both be on `sys.path` — whichever lands in `sys.modules` first wins
+`services/extraction` and `services/validation` both ship a top-level package
+named `app`, so they cannot both be on `sys.path` — whichever lands in `sys.modules` first wins
 and the other's submodules silently resolve against it.
-[`loader.py`](ssb_screening_api/loader.py) binds Phase_1 under the alias
-`phase1`, which is safe because it uses relative imports throughout, and leaves
-`backend/validation` the real name, which it needs because its imports are
-absolute. Neither repository is modified for this.
+[`loader.py`](ssb_screening_api/loader.py) binds the extraction package under the alias
+`extraction_service`, which is safe because it uses relative imports throughout,
+and leaves
+`services/validation` the real name, which it needs because its imports are
+absolute.
 
 ## Where policy lives
 
@@ -96,7 +97,7 @@ from `contracts/config/thresholds.json`, which Python and the app both read, so
 there is one definition of a match, a review band and a risk boundary.
 
 The one piece of translation this service does own is the field-name mapping in
-[`pipeline.py`](ssb_screening_api/pipeline.py): Phase_1 and the validation rule
+[`pipeline.py`](ssb_screening_api/pipeline.py): the extraction service and the validation rule
 sets were written independently and name the same things differently
 (`document_number` against `passport_number`, `issue_date` against
 `date_of_issue`). Every entry there is a synonym. None derives, combines or
@@ -104,7 +105,7 @@ reinterprets a value.
 
 ## Known gaps
 
-- **Field coverage.** Phase_1 has no schema for `visa_type`, `permit_type`,
+- **Field coverage.** The extraction service has no schema for `visa_type`, `permit_type`,
   `place_of_birth`, `blood_group`, `license_class`, `employer` and similar. Rule
   sets that require them will report them missing, which is accurate — the
   pipeline did not read them — but it means visas and permits currently cannot

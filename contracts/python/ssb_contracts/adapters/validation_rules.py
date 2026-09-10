@@ -1,5 +1,5 @@
 """
-Adapter: backend/validation DocumentValidator -> canonical contract.
+Adapter: services/validation DocumentValidator -> canonical contract.
 
 The upstream engine already emits the right shape of information - per-rule
 records with `metric`, `status` and `reason`, plus an aggregate. It is not

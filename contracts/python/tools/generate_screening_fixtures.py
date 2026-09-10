@@ -36,7 +36,7 @@ from ssb_contracts import (  # noqa: E402
     not_available,
     success,
 )
-from ssb_contracts.adapters import face_arcface, ocr_phase1, validation_backend  # noqa: E402
+from ssb_contracts.adapters import face_arcface, ocr_extraction, validation_rules  # noqa: E402
 from ssb_contracts.modules import CheckStatus, ValidationCheck  # noqa: E402
 from ssb_contracts.services import (  # noqa: E402
     ForensicsScenario,
@@ -98,7 +98,7 @@ def ocr(
     confidence: float = 0.97,
     detected: bool = True,
 ) -> Any:
-    return ocr_phase1.from_extract_response(
+    return ocr_extraction.from_extract_response(
         case_id,
         document_type,
         {
@@ -124,7 +124,7 @@ def ocr(
 
 
 def validation(case_id: str, document_type: DocumentType, checks: List[Dict[str, Any]]) -> Any:
-    return validation_backend.from_validator_output(
+    return validation_rules.from_validator_output(
         case_id, document_type, {"rules": checks}
     )
 
@@ -334,10 +334,10 @@ def build(case_id: str, name: str) -> Dict[str, Any]:
         return assemble(
             case_id,
             DocumentType.TRAVEL_AUTHORIZATION,
-            ocr=ocr_phase1.from_extract_response(
+            ocr=ocr_extraction.from_extract_response(
                 case_id, DocumentType.TRAVEL_AUTHORIZATION, {"detected": True}
             ),
-            validation=validation_backend.from_validator_output(
+            validation=validation_rules.from_validator_output(
                 case_id, DocumentType.TRAVEL_AUTHORIZATION, {"rules": []}
             ),
             face_verification=face(case_id, 0.52),
@@ -350,7 +350,7 @@ def build(case_id: str, name: str) -> Dict[str, Any]:
         return assemble(
             case_id,
             DocumentType.PASSPORT,
-            ocr=ocr_phase1.from_failure(
+            ocr=ocr_extraction.from_failure(
                 case_id, "OCR_UNAVAILABLE", "The extraction service is unavailable."
             ),
             validation=not_available(

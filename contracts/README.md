@@ -36,8 +36,8 @@ language mirror has drifted from it.
 
 | Module                | State           | Backed by                  | Notes                                                        |
 | --------------------- | --------------- | -------------------------- | ------------------------------------------------------------ |
-| **OCR / MRZ**         | `MOCK`          | Phase_1 (PP-OCRv5 + U-Net) | Service is built and adapted; not yet reachable from the app |
-| **Validation**        | `MOCK`          | `backend/validation`       | Deterministic rules built and adapted; not yet wired         |
+| **OCR / MRZ**         | `MOCK`          | services/extraction (PP-OCRv5 + U-Net) | Service is built and adapted; not yet reachable from the app |
+| **Validation**        | `MOCK`          | `services/validation`       | Deterministic rules built and adapted; not yet wired         |
 | **Face verification** | `MOCK`          | ArcFace R50 (`buffalo_m`)  | Pipeline built and adapted; thresholds provisional           |
 | **DINOv2 forensics**  | `MOCK`          | `mock-dinov2-v0`           | **Not implemented.** No model, no weights, no data           |
 | **PatchCore anomaly** | `NOT_AVAILABLE` | —                          | **Not built.** Never fabricated, never scored                |
@@ -251,7 +251,7 @@ fraud data when they were chosen by engineering judgement.
 
 `risk_score` is normalised **0–1**. `risk_level` is the single officer-facing
 taxonomy: **`LOW` / `REVIEW` / `HIGH`**. The four-category taxonomy in
-`risk_Score/riskengine/risk.py` (Genuine / Suspicious / High-Risk Fake / Critical
+`reference/risk-prototype/riskengine/risk.py` (Genuine / Suspicious / High-Risk Fake / Critical
 Fraud) is not exposed anywhere.
 
 ### How missing evidence is handled

@@ -1,5 +1,5 @@
 """
-Adapter: gowtham-pepline face verification -> canonical contract.
+Adapter: services/face-verification face verification -> canonical contract.
 
 The upstream pipeline lives in its own repository and is not modified. It
 returns a `VerificationResult` carrying a raw cosine similarity, a three-way
@@ -31,7 +31,7 @@ from ..modules import (
 )
 
 #: Recorded against every case so a later re-tuning cannot silently change what
-#: an officer was shown. Mirrors gowtham-pepline's model files.
+#: an officer was shown. Mirrors services/face-verification's model files.
 ARCFACE_MODEL_VERSION = "arcface-r50-buffalo_m-w600k"
 
 

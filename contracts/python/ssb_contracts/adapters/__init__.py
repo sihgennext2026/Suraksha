@@ -6,6 +6,6 @@ translation lives here so that a change to an upstream response shape is a
 change to one adapter rather than to every consumer.
 """
 
-from . import face_arcface, ocr_phase1, validation_backend
+from . import face_arcface, ocr_extraction, validation_rules
 
-__all__ = ["face_arcface", "ocr_phase1", "validation_backend"]
+__all__ = ["face_arcface", "ocr_extraction", "validation_rules"]

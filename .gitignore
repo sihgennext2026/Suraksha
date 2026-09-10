@@ -47,3 +47,9 @@ coverage/
 
 # Android signing identity (keystore + passwords)
 /credentials/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/

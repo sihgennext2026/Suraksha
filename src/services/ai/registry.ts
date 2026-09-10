@@ -118,12 +118,12 @@ export function getIntegrationStatus(serviceUrl?: string | null): readonly Modul
   return [
     wired(
       'Field extraction (OCR/MRZ)',
-      'Phase_1: PP-LCNet orientation, U-Net detection, PP-OCRv5',
+      'Extraction service: PP-LCNet orientation, U-Net detection, PP-OCRv5',
       'The capture is detected, rectified and read by the extraction pipeline.',
     ),
     wired(
       'Rule validation',
-      'backend/validation deterministic rule sets',
+      'Deterministic rule sets (services/validation)',
       'Rules run against the fields extraction actually read from this document.',
     ),
     wired(

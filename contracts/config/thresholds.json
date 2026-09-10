@@ -22,7 +22,7 @@
     ],
     "match": 0.3,
     "review": 0.14,
-    "source": "gowtham-pepline/src/faceverify/decision.py (MATCH_THRESHOLD, REVIEW_THRESHOLD)",
+    "source": "services/face-verification/src/faceverify/decision.py (MATCH_THRESHOLD, REVIEW_THRESHOLD)",
     "calibration": "LFW sweep: EER t=0.1007 (FAR 4.54%/FRR 4.55%), FAR<=1% t=0.1407, FAR<=0.1% t=0.2254",
     "confidence": "PROVISIONAL. Calibrated on LFW (same-domain photo pairs). Production use is cross-domain (document portrait vs live capture) and is NOT validated."
   },
@@ -89,7 +89,7 @@
       "validation_review_floor": "REVIEW",
       "insufficient_evidence_floor": "REVIEW"
     },
-    "source": "Weight ordering follows risk_Score/riskengine/risk.py (tampering 0.45 > face 0.30 > validation 0.25), extended to cover OCR and anomaly.",
+    "source": "Weight ordering follows reference/risk-prototype/riskengine/risk.py (tampering 0.45 > face 0.30 > validation 0.25), extended to cover OCR and anomaly.",
     "confidence": "PROVISIONAL. Weights are an engineering judgement about signal strength, not a fit to labelled fraud data. Do not present them as calibrated."
   },
 
@@ -100,7 +100,7 @@
     ],
     "low_confidence_below": 0.75,
     "review_confidence_below": 0.9,
-    "source": "Phase_1 PP-OCRv5 per-line confidences (ExtractResponse.field_lines[].confidence)",
+    "source": "services/extraction PP-OCRv5 per-line confidences (ExtractResponse.field_lines[].confidence)",
     "confidence": "HEURISTIC. Display and triage only."
   },
 

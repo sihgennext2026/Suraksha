@@ -3,9 +3,10 @@
   Starts the SSB Suraksha screening service.
 
 .DESCRIPTION
-  Loads Phase_1 (orientation, U-Net detection, perspective correction, PP-OCRv5,
-  MRZ/QR), backend/validation (deterministic rule sets) and the faceverify
-  pipeline (SCRFD + ArcFace R50) into one process, and serves POST /screen.
+  Loads services/extraction (orientation, U-Net detection, perspective
+  correction, PP-OCRv5, MRZ/QR), services/validation (deterministic rule sets)
+  and services/face-verification (SCRFD + ArcFace R50) into one process, and
+  serves POST /screen.
 
   Two environment details are handled here rather than left to the operator:
 
