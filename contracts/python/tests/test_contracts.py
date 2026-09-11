@@ -107,7 +107,7 @@ def ocr_envelope(*, detected: bool = True, confidence: float = 0.96):
             "detected_lang_family": "latin",
         },
         image_size=(1000, 1000),
-    )
+    ).envelope
 
 
 def forensics_envelope(scenario: ForensicsScenario):
@@ -331,7 +331,7 @@ class TestOcr:
             CASE,
             DocumentType.PASSPORT,
             {"detected": True, "detection_box": [10, 20, 210, 320]},
-        )
+        ).envelope
         assert envelope.result["detection"]["box"] is None
 
     def test_mrz_checksum_is_null_because_extraction_does_not_evaluate_it(self):
@@ -344,7 +344,7 @@ class TestOcr:
             CASE,
             DocumentType.DRIVING_LICENSE,
             {"detected": True, "mrz_lines": ["SHOULD", "NOT", "HAPPEN"]},
-        )
+        ).envelope
         assert envelope.result["mrz"]["present"] is False
 
     def test_an_undetected_document_is_partial_not_failed(self):

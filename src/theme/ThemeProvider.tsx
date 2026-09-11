@@ -40,7 +40,9 @@ function buildTheme(scheme: ColorScheme): Theme {
 const darkTheme = buildTheme('dark');
 const lightTheme = buildTheme('light');
 
-const ThemeContext = createContext<Theme>(darkTheme);
+// Light is the product's default surface; dark remains available for night
+// duty at a post, where a bright screen is a liability.
+const ThemeContext = createContext<Theme>(lightTheme);
 
 interface ThemeProviderProps {
   preference: ThemePreference;

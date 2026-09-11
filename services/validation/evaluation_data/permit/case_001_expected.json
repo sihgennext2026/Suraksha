@@ -1,0 +1,10 @@
+{
+  "document_type": "permit",
+  "fields": {
+    "name": "JOHN SMITH",
+    "permit_number": "WP-2024-98765",
+    "permit_type": "Employment",
+    "date_of_issue": "2024-03-01",
+    "date_of_expiry": "2026-02-28"
+  }
+}

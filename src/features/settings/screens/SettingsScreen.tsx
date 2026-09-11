@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 
 import { AppHeader } from '@/components/layout/AppHeader';
+import { BrandMark } from '@/components/brand/BrandMark';
 import { Panel, Section } from '@/components/layout/Panel';
 import { Screen } from '@/components/layout/Screen';
 import { Button } from '@/components/primitives/Button';
@@ -14,12 +15,14 @@ import { SyncBadge } from '@/components/data/StatusBadge';
 import { BottomSheet, ConfirmDialog } from '@/components/overlay/Sheet';
 import { EmptyState, InlineNotice } from '@/components/feedback/States';
 import { ROLE_LABEL } from '@/constants/labels';
+import { MODULE_LABELS } from '@/constants/screening';
 
 import { ROUTES } from '@/constants/routes';
 import { syncQueueRepository } from '@/db';
 import { SystemStatusPanel } from '@/features/dashboard/components/SystemStatusPanel';
 import { useSystemStatus } from '@/features/dashboard/useSystemStatus';
 import { useRefreshCases } from '@/features/cases/useCases';
+import { useServiceHealth, type ServiceHealthState } from '@/features/settings/useServiceHealth';
 import { syncEngine } from '@/services/sync/syncEngine';
 import { useAuthStore, selectUser } from '@/stores/authStore';
 import {
@@ -44,6 +47,26 @@ import { formatDateTime, formatRelative } from '@/utils/date';
  * that fails mid-pipeline, a device that loses connectivity — can be
  * demonstrated on real hardware rather than only asserted in tests.
  */
+/**
+ * The connection read-out.
+ *
+ * "Running" is claimed only for a service that answered this check — never
+ * inferred from an address being present, because a configured-but-unreachable
+ * service is exactly the case the officer needs to be able to see.
+ */
+function serviceHealthLabel(state: ServiceHealthState): string {
+  if (state.status !== 'DONE') return 'Checking…';
+  if (!state.health.reachable) return 'Not reachable';
+  const live = state.health.modules.filter((entry) => entry.available).length;
+  return `Reachable · ${live} of ${state.health.modules.length} modules running`;
+}
+
+function serviceHealthHint(state: ServiceHealthState, url: string | null): string | undefined {
+  if (state.status !== 'DONE') return url ?? undefined;
+  if (!state.health.reachable) return state.health.reason;
+  return url ?? undefined;
+}
+
 export function SettingsScreen() {
   const router = useRouter();
   const theme = useTheme();
@@ -61,6 +84,7 @@ export function SettingsScreen() {
   const commitServiceUrl = useCallback(() => {
     setScreeningServiceUrl(normaliseServiceUrl(serviceUrlDraft));
   }, [serviceUrlDraft, setScreeningServiceUrl]);
+  const health = useServiceHealth(serviceUrl);
   const integrationStatus = useMemo(() => getIntegrationStatus(serviceUrl), [serviceUrl]);
 
   const themePreference = useSettingsStore((state) => state.theme);
@@ -241,7 +265,7 @@ export function SettingsScreen() {
                           ? 'SYNCING'
                           : 'PENDING'
                     }
-                    size="small"
+                    size="medium"
                   />
                 </Pressable>
               ))}
@@ -377,13 +401,58 @@ export function SettingsScreen() {
             />
           </Panel>
 
-          {isUsingRealScreening(serviceUrl) ? null : (
+          <Panel padded={false}>
+            <KeyValueRow
+              label="Connection"
+              value={serviceHealthLabel(health.state)}
+              hint={serviceHealthHint(health.state, health.resolvedUrl)}
+              stacked
+              testID="service-health"
+            />
+            <View style={styles.serviceCheckRow}>
+              <Button
+                label="Check again"
+                variant="secondary"
+                size="medium"
+                onPress={health.check}
+                loading={health.state.status === 'CHECKING'}
+                disabled={health.state.status === 'CHECKING'}
+              />
+            </View>
+          </Panel>
+
+          {health.state.status === 'DONE' && health.state.health.reachable ? (
+            <Panel padded={false}>
+              {health.state.health.modules.map((entry, index) => (
+                <KeyValueRow
+                  key={entry.module}
+                  label={MODULE_LABELS[entry.module as keyof typeof MODULE_LABELS] ?? entry.module}
+                  value={entry.available ? 'Running' : 'Not available'}
+                  hint={entry.reason ?? undefined}
+                  stacked={!entry.available}
+                  style={
+                    index === 0
+                      ? undefined
+                      : [styles.moduleRow, { borderTopColor: theme.color.border }]
+                  }
+                />
+              ))}
+            </Panel>
+          ) : null}
+
+          {health.state.status === 'DONE' && !health.state.health.reachable ? (
             <InlineNotice
               tone="caution"
-              title="No screening service is configured"
-              message="Screenings replay a generated document. Nothing shown comes from the capture, and the integration table below says so for each module."
+              title={
+                isUsingRealScreening(serviceUrl)
+                  ? 'The screening service cannot be reached'
+                  : 'No screening service is configured'
+              }
+              message={`${health.state.health.reason} Until it answers, screenings replay a generated document — nothing shown comes from the capture.`}
+              actionLabel="Check again"
+              onAction={health.check}
             />
-          )}
+          ) : null}
         </Section>
 
         <Section
@@ -440,6 +509,16 @@ export function SettingsScreen() {
             style={{ marginTop: theme.spacing.md }}
           />
         </Section>
+
+        <View style={styles.about}>
+          <BrandMark size={64} label="SSB Suraksha" />
+          <Text role="caption" tone="tertiary" style={{ marginTop: theme.spacing.sm }}>
+            SSB Suraksha 1.0.0
+          </Text>
+          <Text role="caption" tone="tertiary">
+            Secure identities, safer borders
+          </Text>
+        </View>
       </Screen>
 
       <BottomSheet
@@ -566,6 +645,9 @@ function ToggleRow({
 }
 
 const styles = StyleSheet.create({
+  about: { alignItems: 'center', paddingVertical: 32, opacity: 0.9 },
+  serviceCheckRow: { paddingHorizontal: 16, paddingBottom: 16, alignItems: 'flex-start' },
+  moduleRow: { borderTopWidth: StyleSheet.hairlineWidth },
   syncActions: { flexDirection: 'row', gap: 8 },
   queueRow: {
     flexDirection: 'row',

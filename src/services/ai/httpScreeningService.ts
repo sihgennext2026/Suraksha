@@ -49,6 +49,9 @@ export class HttpScreeningService implements ScreeningService {
     body.append('document_type', request.documentType);
     body.append('document', asUpload(request.documentImage.uri, 'document.jpg'));
     body.append('person', asUpload(request.personImage.uri, 'person.jpg'));
+    if (request.documentBackImage) {
+      body.append('document_back', asUpload(request.documentBackImage.uri, 'document_back.jpg'));
+    }
 
     // The service runs the modules in one call, so there is no per-stage
     // progress to stream. The indicator is advanced to PROCESSING for every
@@ -124,12 +127,80 @@ function emitStages(result: ScreeningCaseResult, onStage: ScreeningRequest['onSt
   for (const event of stageEventsFor(result)) onStage(event);
 }
 
-/** Which modules the service can currently run. Used by the Settings read-out. */
-export async function probeScreeningService(baseUrl: string): Promise<boolean> {
+/** One module's availability, as the service reports it. */
+export interface ServiceModuleHealth {
+  module: string;
+  available: boolean;
+  reason: string | null;
+}
+
+export type ServiceHealth =
+  | { reachable: true; modules: ServiceModuleHealth[] }
+  | { reachable: false; reason: string };
+
+/**
+ * An interactive check, so it fails fast rather than leaving a spinner up.
+ * A screening itself is allowed two minutes; deciding whether an address is
+ * even correct should take seconds.
+ */
+const HEALTH_TIMEOUT_MS = 6_000;
+
+/**
+ * Asks the service which modules it can currently run.
+ *
+ * Worth doing from Settings rather than waiting for a screening to fail: an
+ * unreachable service is indistinguishable, from the officer's side, from a
+ * configured one — the app quietly falls back to replaying a generated
+ * document, and the first sign of trouble would otherwise be findings that did
+ * not come from the capture in front of them.
+ */
+export async function checkScreeningService(
+  baseUrl: string | null,
+  options: { signal?: AbortSignal } = {},
+): Promise<ServiceHealth> {
+  if (!baseUrl) {
+    return { reachable: false, reason: 'No address is configured.' };
+  }
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), HEALTH_TIMEOUT_MS);
+  const abort = () => controller.abort();
+  options.signal?.addEventListener('abort', abort);
+
   try {
-    const response = await fetch(`${baseUrl.replace(/\/+$/, '')}/health`, { method: 'GET' });
-    return response.ok;
+    const response = await fetch(`${baseUrl.replace(/\/+$/, '')}/health`, {
+      method: 'GET',
+      signal: controller.signal,
+    });
+    if (!response.ok) {
+      return { reachable: false, reason: `The service answered with ${response.status}.` };
+    }
+
+    const body = (await response.json()) as {
+      modules?: Record<string, { available?: boolean; reason?: string | null }>;
+    };
+    const modules = Object.entries(body.modules ?? {}).map(([module, entry]) => ({
+      module,
+      available: entry?.available === true,
+      reason: entry?.reason ?? null,
+    }));
+    return { reachable: true, modules };
   } catch {
-    return false;
+    if (options.signal?.aborted) {
+      return { reachable: false, reason: 'The check was cancelled.' };
+    }
+    if (controller.signal.aborted) {
+      return { reachable: false, reason: 'No answer within six seconds.' };
+    }
+    // Deliberately not the raw error: "Network request failed" tells an officer
+    // nothing they can act on, and the two things worth checking are the same
+    // every time.
+    return {
+      reachable: false,
+      reason: 'Could not connect. Check the address and that this device is on the same network.',
+    };
+  } finally {
+    clearTimeout(timeout);
+    options.signal?.removeEventListener('abort', abort);
   }
 }

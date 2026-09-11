@@ -37,7 +37,7 @@ interface SettingsState extends PersistedSettings {
 }
 
 const DEFAULTS: PersistedSettings = {
-  theme: 'dark',
+  theme: 'light',
   autoSync: true,
   hapticFeedback: true,
   forcedScenario: null,

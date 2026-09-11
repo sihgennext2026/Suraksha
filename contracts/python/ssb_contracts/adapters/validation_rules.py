@@ -24,6 +24,7 @@ The decision is recomputed from the checks rather than copied from
 
 from __future__ import annotations
 
+from dataclasses import replace
 from typing import Any, Dict, List
 
 from ..core import Envelope, Module, ModuleError, failed, not_available, success
@@ -144,9 +145,42 @@ def build_result(
     return ValidationResult.from_checks(checks, rule_version=rule_version)
 
 
+def with_extra_checks(envelope: Envelope, checks: List[ValidationCheck]) -> Envelope:
+    """
+    Adds checks the rule engine could not have produced.
+
+    Cross-source agreement is the case in point: whether a document's two
+    captures say the same thing is a property of assembling one record from
+    them, and the validation service is handed a single field set and never
+    learns there were two sides. The finding is still a rule outcome to the
+    officer, so it belongs in the same list rather than in a parallel channel
+    they would have to know to look at.
+
+    The decision is recomputed over the combined set, so an added REVIEW can
+    move a VALID result to REVIEW. It cannot move it to INVALID: nothing in this
+    path emits FAIL, by design.
+    """
+    if not checks or envelope.result is None:
+        return envelope
+
+    # `from_checks` compares statuses by identity, so a status rehydrated from
+    # JSON as a plain string would be counted in no bucket at all — the rolled-up
+    # summary would silently under-report every existing check.
+    existing = [
+        ValidationCheck(**{**check, "status": CheckStatus(check["status"])})
+        for check in envelope.result.get("checks", [])
+    ]
+    combined = build_result(existing + list(checks))
+    return replace(
+        envelope,
+        result=combined.to_dict(),
+    )
+
+
 __all__ = [
     "RULE_ENGINE_VERSION",
     "build_result",
+    "with_extra_checks",
     "from_failure",
     "from_validator_output",
     "unavailable",

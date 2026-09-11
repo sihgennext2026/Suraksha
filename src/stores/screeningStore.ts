@@ -51,6 +51,7 @@ interface ScreeningState {
   start(user: AuthenticatedUser): Promise<ScreeningCase>;
   setDocumentType(type: DocumentType): Promise<void>;
   attachDocument(image: CapturedImage): Promise<void>;
+  attachDocumentBack(image: CapturedImage): Promise<void>;
   attachPerson(image: CapturedImage): Promise<void>;
   runScreening(options?: { scenario?: string }): Promise<void>;
   cancelScreening(): void;
@@ -266,6 +267,11 @@ export const useScreeningStore = create<ScreeningState>((set, get) => {
             caseId: activeCase.id,
             declaredType: activeCase.documentType,
             image: persisted,
+            // Re-capturing the front discards any reverse taken against it:
+            // the two images must be of the same document, and keeping an old
+            // back beside a new front would merge readings from two captures
+            // the officer never intended to pair.
+            backImage: null,
           },
         }),
         'DOCUMENT_REVIEW',
@@ -281,6 +287,59 @@ export const useScreeningStore = create<ScreeningState>((set, get) => {
         actorId: next.officerId,
         actorName: next.officerName,
         metadata: { source: persisted.source },
+      });
+    },
+
+    /**
+     * Records the reverse side against the document already captured.
+     *
+     * Optional by design: the officer moves on without it, and the merge then
+     * reports anything the type expected on the back as REVIEW rather than
+     * treating the screening as incomplete.
+     */
+    async attachDocumentBack(image) {
+      const current = get().activeCase;
+      if (!current?.document) return;
+
+      // Which front this reverse was photographed against. Writing the file is
+      // asynchronous, and in that window the officer can retake the front or
+      // abandon the case and open another. Attaching the reverse to a front it
+      // was not taken with would merge readings from two different physical
+      // documents — the one thing this pairing must never do — so the capture
+      // is dropped rather than applied to whatever happens to be current.
+      const pairedCaseId = current.id;
+      const pairedFrontUri = current.document.image.uri;
+
+      const persisted = await mediaStore.persistCapture(current.id, 'document_back', image);
+      const next = await commit((activeCase) => {
+        if (activeCase.id !== pairedCaseId) return activeCase;
+        if (!activeCase.document || activeCase.document.image.uri !== pairedFrontUri) {
+          return activeCase;
+        }
+        return {
+          ...activeCase,
+          document: { ...activeCase.document, backImage: persisted },
+        };
+      });
+      if (!next) return;
+
+      if (next.document?.backImage?.uri !== persisted.uri) {
+        log.warn('Discarded a reverse capture: its front is no longer the active one', {
+          caseId: pairedCaseId,
+          ok: false,
+        });
+        return;
+      }
+
+      await recordAudit({
+        caseId: next.id,
+        type: 'DOCUMENT_CAPTURED',
+        description: `Document reverse captured from ${
+          persisted.source === 'CAMERA' ? 'the camera' : 'an imported image'
+        }`,
+        actorId: next.officerId,
+        actorName: next.officerName,
+        metadata: { source: persisted.source, side: 'back' },
       });
     },
 
@@ -349,6 +408,7 @@ export const useScreeningStore = create<ScreeningState>((set, get) => {
           caseId: current.id,
           documentType: current.documentType,
           documentImage: current.document.image,
+          documentBackImage: current.document.backImage ?? undefined,
           personImage: current.person.image,
           signal: screeningController.signal,
           onStage: (event) => applyStageEvent(set, get, event),

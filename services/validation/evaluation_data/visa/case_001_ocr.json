@@ -1,0 +1,24 @@
+{
+  "detected": true,
+  "detection_confidence": 0.93,
+  "detection_box": [80, 100, 750, 900],
+  "correction_mode": "cv_contour_warp",
+  "lines": [
+    {"text": "UNITED STATES OF AMERICA", "confidence": 0.98},
+    {"text": "NONIMMIGRANT VISA", "confidence": 0.97},
+    {"text": "Visa Type/Class B1/B2", "confidence": 0.96},
+    {"text": "Visa Number", "confidence": 0.95},
+    {"text": "A12345678", "confidence": 0.98},
+    {"text": "Passport Number", "confidence": 0.95},
+    {"text": "Z1234567", "confidence": 0.97},
+    {"text": "Name", "confidence": 0.96},
+    {"text": "ARUN KUMAR", "confidence": 0.97},
+    {"text": "Nationality IND", "confidence": 0.95},
+    {"text": "Date of Issue 15-06-2023", "confidence": 0.94},
+    {"text": "Date of Expiry 14-06-2033", "confidence": 0.94}
+  ],
+  "full_text": "UNITED STATES OF AMERICA NONIMMIGRANT VISA Visa Type/Class B1/B2 Visa Number A12345678 Passport Number Z1234567 Name ARUN KUMAR Nationality IND Date of Issue 15-06-2023 Date of Expiry 14-06-2033",
+  "average_confidence": 0.95,
+  "timings_ms": {"detection_ms": 200, "correction_ms": 10, "ocr_ms": 900, "total_ms": 1110},
+  "message": null
+}

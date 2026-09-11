@@ -1,0 +1,118 @@
+{
+  "detected": true,
+  "detection_confidence": 0.9308334589004517,
+  "detection_box": [
+    148.53213500976562,
+    678.068603515625,
+    1021.4837646484375,
+    1257.9373779296875
+  ],
+  "correction_mode": "cv_contour_warp",
+  "lines": [
+    {
+      "text": "Indian Union Driving Licence",
+      "confidence": 0.9840660095214844
+    },
+    {
+      "text": "Issued by Government Of Tamil Nadu",
+      "confidence": 0.9577779173851013
+    },
+    {
+      "text": "TN",
+      "confidence": 0.997852087020874
+    },
+    {
+      "text": "TN9220250003111",
+      "confidence": 0.9976261854171753
+    },
+    {
+      "text": "",
+      "confidence": 0
+    },
+    {
+      "text": "-9090",
+      "confidence": 0.4826591908931732
+    },
+    {
+      "text": "Issue Date",
+      "confidence": 0.9757855534553528
+    },
+    {
+      "text": "Validity (NT)",
+      "confidence": 0.9623302221298215
+    },
+    {
+      "text": "Validity (TR)",
+      "confidence": 0.964055478572845
+    },
+    {
+      "text": "16-06-2025",
+      "confidence": 0.9977567791938782
+    },
+    {
+      "text": "09-09-2046",
+      "confidence": 0.9971707463264465
+    },
+    {
+      "text": "",
+      "confidence": 0
+    },
+    {
+      "text": "Name:",
+      "confidence": 0.9849570989608765
+    },
+    {
+      "text": "Holder's Signature",
+      "confidence": 0.9713828563690186
+    },
+    {
+      "text": "MELKIBSON",
+      "confidence": 0.9965855479240417
+    },
+    {
+      "text": "DateofBirth:10-03-2006",
+      "confidence": 0.9505794048309326
+    },
+    {
+      "text": "Blood Group: B+",
+      "confidence": 0.900506854057312
+    },
+    {
+      "text": "OrganQonor: Y",
+      "confidence": 0.922804415893173
+    },
+    {
+      "text": "Son/Daughter",
+      "confidence": 0.9949426054958453
+    },
+    {
+      "text": "SUTHERSON",
+      "confidence": 0.9971888065338135
+    },
+    {
+      "text": "Address:",
+      "confidence": 0.9882461428642273
+    },
+    {
+      "text": "153/2MALASTREETPUNNAIKKAYALPUNNAKAYAL",
+      "confidence": 0.988534152507782
+    },
+    {
+      "text": "Tiruchendur,Tuticorin,TN628151",
+      "confidence": 0.9884514212601013
+    },
+    {
+      "text": "PDL",
+      "confidence": 0.9914014339447021
+    }
+  ],
+  "full_text": "Indian Union Driving Licence Issued by Government Of Tamil Nadu TN TN9220250003111 -9090 Issue Date Validity (NT) Validity (TR) 16-06-2025 09-09-2046 Name: Holder's Signature MELKIBSON DateofBirth:10-03-2006 Blood Group: B+ OrganQonor: Y Son/Daughter SUTHERSON Address: 153/2MALASTREETPUNNAIKKAYALPUNNAKAYAL Tiruchendur,Tuticorin,TN628151 PDL",
+  "average_confidence": 0.874694204578797,
+  "timings_ms": {
+    "detection_ms": 386.144799998,
+    "correction_ms": 34.508100001,
+    "ocr_ms": 1897.8743000006943,
+    "total_ms": 2381.15309999921
+  },
+  "message": null
+}

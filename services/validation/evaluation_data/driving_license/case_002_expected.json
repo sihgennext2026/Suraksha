@@ -1,0 +1,10 @@
+{
+  "document_type": "driving_license",
+  "fields": {
+    "name": "PRIYA SHARMA",
+    "license_number": "KA1420190012345",
+    "date_of_birth": "1998-05-20",
+    "date_of_issue": "2019-03-12",
+    "date_of_expiry": "2039-03-11"
+  }
+}

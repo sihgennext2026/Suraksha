@@ -1,0 +1,16 @@
+{
+  "document_type": "national_id",
+  "required_fields": [
+    "name",
+    "national_id_number",
+    "date_of_birth",
+    "gender",
+    "address"
+  ],
+  "optional_fields": [
+    "date_of_issue",
+    "date_of_expiry"
+  ],
+  "expiry_required": false,
+  "date_format": "YYYY-MM-DD"
+}

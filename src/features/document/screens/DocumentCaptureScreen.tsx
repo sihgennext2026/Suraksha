@@ -36,7 +36,19 @@ const log = createLogger('document-capture');
  * silently blocked: an officer who judges the frame acceptable can capture
  * anyway and decide on the review screen.
  */
-export function DocumentCaptureScreen() {
+export interface DocumentCaptureScreenProps {
+  /**
+   * Which face of the document is being photographed.
+   *
+   * The camera, the overlay and the live guidance are identical for both, so
+   * the screen is parameterised rather than copied: a second implementation
+   * would drift, and the officer would meet two subtly different cameras in one
+   * workflow.
+   */
+  side?: 'front' | 'back';
+}
+
+export function DocumentCaptureScreen({ side = 'front' }: DocumentCaptureScreenProps = {}) {
   const router = useRouter();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
@@ -51,6 +63,8 @@ export function DocumentCaptureScreen() {
   const [error, setError] = useState<string | null>(null);
 
   const attachDocument = useScreeningStore((state) => state.attachDocument);
+  const attachDocumentBack = useScreeningStore((state) => state.attachDocumentBack);
+  const isBack = side === 'back';
   const feedback = useLiveCaptureFeedback('DOCUMENT', cameraReady && !busy);
 
   const descriptor = activeCase
@@ -63,10 +77,16 @@ export function DocumentCaptureScreen() {
       // No inference happens here. The capture is stored, and every model result
       // arrives later from a single screening call - which is what stops the app
       // holding a second, divergent view of what the document is.
+      if (isBack) {
+        await attachDocumentBack(image);
+        // Back to the review, where both sides are now shown together.
+        router.back();
+        return;
+      }
       await attachDocument(image);
       router.push(ROUTES.screening.documentReview);
     },
-    [activeCase, attachDocument, router],
+    [activeCase, attachDocument, attachDocumentBack, isBack, router],
   );
 
   const handleCapture = useCallback(async () => {
@@ -174,7 +194,7 @@ export function DocumentCaptureScreen() {
               {activeCase.id}
             </Text>
             <Text role="label" style={{ color: '#FFFFFF' }}>
-              {descriptor.label}
+              {isBack ? `${descriptor.label} · reverse` : descriptor.label}
             </Text>
           </View>
           <View style={styles.backButton} />

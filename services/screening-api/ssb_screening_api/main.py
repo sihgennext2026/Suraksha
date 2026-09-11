@@ -92,6 +92,7 @@ async def screen(
     document_type: str = Form(...),
     document: UploadFile = File(...),
     person: UploadFile = File(...),
+    document_back: Optional[UploadFile] = File(None),
 ):
     """
     Screens one case and returns the assembled document.
@@ -105,6 +106,12 @@ async def screen(
 
     document_bytes = await _read_capture(document, "Document")
     person_bytes = await _read_capture(person, "Subject")
+    # Optional: a reverse side is offered, never demanded. A document type whose
+    # back carries nothing this pipeline reads should not cost the officer a
+    # second capture.
+    back_bytes = (
+        await _read_capture(document_back, "Document back") if document_back is not None else None
+    )
 
     try:
         result = await _pipeline.screen(
@@ -112,6 +119,7 @@ async def screen(
             document_type_value=document_type,
             document=document_bytes,
             person=person_bytes,
+            document_back=back_bytes,
         )
     except ValueError as error:
         # `parse` rejects a document type the contract does not define.

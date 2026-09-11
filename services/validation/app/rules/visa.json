@@ -1,0 +1,18 @@
+{
+  "document_type": "visa",
+  "required_fields": [
+    "name",
+    "visa_number",
+    "passport_number",
+    "nationality",
+    "visa_type",
+    "date_of_issue",
+    "date_of_expiry"
+  ],
+  "optional_fields": [
+    "entries",
+    "duration_of_stay"
+  ],
+  "expiry_required": true,
+  "date_format": "YYYY-MM-DD"
+}

@@ -7,7 +7,7 @@
     "icon": "./assets/icon.png",
     "scheme": "ssbsuraksha",
     "userInterfaceStyle": "light",
-    "backgroundColor": "#0B1017",
+    "backgroundColor": "#F7F8FA",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "in.gov.ssb.suraksha",
@@ -20,10 +20,9 @@
     "android": {
       "package": "in.gov.ssb.suraksha",
       "adaptiveIcon": {
-        "backgroundColor": "#0B1017",
+        "backgroundColor": "#F7F8FA",
         "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundImage": "./assets/android-icon-background.png"
       },
       "predictiveBackGestureEnabled": false,
       "permissions": [
@@ -42,7 +41,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#0B1017",
+          "backgroundColor": "#F7F8FA",
           "dark": {
             "backgroundColor": "#0B1017",
             "image": "./assets/splash-icon.png"

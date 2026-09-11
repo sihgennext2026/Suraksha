@@ -1,0 +1,20 @@
+{
+  "document_type": "passport",
+  "required_fields": [
+    "name",
+    "passport_number",
+    "nationality",
+    "date_of_birth",
+    "date_of_issue",
+    "date_of_expiry"
+  ],
+  "optional_fields": [
+    "sex",
+    "place_of_birth",
+    "issuing_authority"
+  ],
+  "expiry_required": true,
+  "date_format": "YYYY-MM-DD",
+  "mrz_required": false,
+  "passport_number_pattern": "^[A-Z0-9]{6,12}$"
+}

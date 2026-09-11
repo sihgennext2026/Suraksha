@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/primitives/Button';
 import { Text } from '@/components/primitives/Text';
 import { TextField } from '@/components/primitives/TextField';
+import { BrandMark } from '@/components/brand/BrandMark';
 import { Panel, Section } from '@/components/layout/Panel';
 import { Screen } from '@/components/layout/Screen';
 import { InlineNotice } from '@/components/feedback/States';
@@ -60,21 +61,7 @@ export function LoginScreen() {
   return (
     <Screen tone="canvas" contentStyle={{ paddingTop: theme.spacing.giant }}>
       <View style={styles.brand}>
-        <View
-          style={[
-            styles.mark,
-            {
-              borderColor: theme.color.accentBorder,
-              backgroundColor: theme.color.accentSubtle,
-              borderWidth: theme.borderWidth.thin,
-              borderRadius: theme.radii.md,
-            },
-          ]}
-        >
-          <Text role="title" tone="accent" weight="bold" accessible={false}>
-            SS
-          </Text>
-        </View>
+        <BrandMark size={104} />
         <Text role="headline" style={{ marginTop: theme.spacing.lg }} accessibilityRole="header">
           SSB Suraksha
         </Text>
@@ -285,7 +272,6 @@ function StatusLine({
 
 const styles = StyleSheet.create({
   brand: { alignItems: 'center' },
-  mark: { width: 56, height: 56, alignItems: 'center', justifyContent: 'center' },
   statusLine: {
     flexDirection: 'row',
     justifyContent: 'space-between',

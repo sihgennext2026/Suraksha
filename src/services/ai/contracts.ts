@@ -125,6 +125,12 @@ export interface ScreeningRequest {
   /** Declared by the officer. Nothing infers it. */
   documentType: DocumentType;
   documentImage: CapturedImage;
+  /**
+   * The reverse side, where one was captured. Absent is ordinary: a passport's
+   * reverse carries nothing this pipeline reads, and the screening runs on the
+   * front alone.
+   */
+  documentBackImage?: CapturedImage;
   personImage: CapturedImage;
   signal?: AbortSignal;
   onStage?: (event: StageEvent) => void;

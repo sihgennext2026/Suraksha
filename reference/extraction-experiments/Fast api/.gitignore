@@ -1,0 +1,56 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+ENV/
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# ---- Model weights & large artifacts (too large for git) ----
+*.onnx
+*.pdiparams
+*.pdmodel
+*.pdopt
+models/
+
+# ---- PaddleOCR / PaddleX auto-downloaded cache ----
+.paddlex/
+paddlex/
+
+# ---- Debug output from ?save_debug=true ----
+api_debug_output/
+
+# ---- Environment / secrets ----
+.env
+.env.local
+*.pem
+*.key
+
+# ---- Jupyter ----
+.ipynb_checkpoints/
+
+# ---- Testing / coverage ----
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ---- OS junk ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Editor / IDE ----
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ---- Logs ----
+*.log

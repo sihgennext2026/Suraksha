@@ -53,3 +53,15 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .venv/
+
+# InsightFace pretrained weights (buffalo_m pack).
+#
+# Excluded on licensing grounds, not size — they are LFS-tracked and would
+# upload fine. InsightFace releases its code under MIT but its pretrained model
+# packs for non-commercial research use only, and this is an operational border
+# screening system. Redistributing them here would publish them under terms the
+# upstream project does not grant.
+#
+# The files stay on disk and the service runs normally. See
+# services/face-verification/models/buffalo_m/README.md for how to obtain them.
+services/face-verification/models/buffalo_m/*.onnx

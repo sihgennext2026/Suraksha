@@ -1,0 +1,10 @@
+{
+  "document_type": "national_id",
+  "fields": {
+    "name": "RAJESH KUMAR",
+    "national_id_number": "123456789012",
+    "date_of_birth": "1985-07-12",
+    "gender": "M",
+    "address": "45 NEHRU NAGAR NEW DELHI 110001"
+  }
+}

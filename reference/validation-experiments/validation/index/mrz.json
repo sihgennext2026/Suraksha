@@ -1,0 +1,54 @@
+{
+    "success": true,
+    "errors": [],
+    "document_type": "passport",
+    "mrz_document_type": "P<",
+    "issuing_country": "IND",
+    "surname": "KUMARAGURU",
+    "given_names": "KRISHNARAJ",
+    "full_name": "KUMARAGURU, KRISHNARAJ",
+    "document_number": "AW854232",
+    "nationality": "IND",
+    "date_of_birth": "2006-05-05",
+    "sex": "M",
+    "date_of_expiry": "2036-08-16",
+    "optional_data": "1064933093726<7",
+    "checksums": {
+        "document_number": {
+            "provided": "0",
+            "calculated": 0,
+            "valid": true
+        },
+        "date_of_birth": {
+            "provided": "8",
+            "calculated": 8,
+            "valid": true
+        },
+        "date_of_expiry": {
+            "provided": "4",
+            "calculated": 4,
+            "valid": true
+        },
+        "composite": {
+            "provided": "6",
+            "calculated": 6,
+            "valid": true
+        }
+    },
+    "confidence": {
+        "document_type": 1.0,
+        "issuing_country": 1.0,
+        "surname": 1.0,
+        "given_names": 1.0,
+        "document_number": 1.0,
+        "nationality": 1.0,
+        "date_of_birth": 1.0,
+        "sex": 1.0,
+        "date_of_expiry": 1.0
+    },
+    "raw_mrz": {
+        "line_1": "P<INDKUMARAGURU<<KRISHNARAJ<<<<<<<<<<<<<<<<<",
+        "line_2": "AW854232<0IND0605058M36081641064933093726<76"
+    },
+    "timestamp": "2026-09-08T15:08:55.111950+00:00"
+}

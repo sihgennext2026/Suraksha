@@ -1,0 +1,10 @@
+{
+  "document_type": "driving_license",
+  "fields": {
+    "name": "MELKIBSON",
+    "license_number": "TN9220250003111",
+    "date_of_birth": "2006-03-10",
+    "date_of_issue": "2025-06-16",
+    "date_of_expiry": "2046-09-09"
+  }
+}

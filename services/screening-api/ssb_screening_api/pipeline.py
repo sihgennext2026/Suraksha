@@ -25,7 +25,7 @@ from __future__ import annotations
 import io
 import logging
 import tempfile
-from dataclasses import dataclass
+from dataclasses import dataclass, field as dataclass_field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -46,16 +46,20 @@ FORENSICS_NOT_IMPLEMENTED = (
 @dataclass
 class OcrOutcome:
     """
-    The extraction envelope, plus the raw extraction body it came from.
+    The extraction envelope, plus what the pipeline needs downstream.
 
-    Validation needs the extracted text, and the envelope deliberately does not
-    carry it — the canonical `OcrResult` is a curated view, not a transport for
-    upstream internals. Rather than widen the contract to suit one consumer, the
-    raw body is passed alongside it and never leaves this process.
+    `merged` is the canonical field list after both captures have been
+    reconciled, and is what validation runs on — not either side's raw reading.
+    `checks` are the merge's own findings about whether the two sides agree,
+    which are appended to the validation result because that is where the
+    officer reads rule outcomes.
     """
 
     envelope: Any
+    #: The front body. Retained only for the MRZ block, which validation reads.
     raw: Optional[Dict[str, Any]]
+    merged: List[Any] = dataclass_field(default_factory=list)
+    checks: List[Any] = dataclass_field(default_factory=list)
 
 
 @dataclass
@@ -121,9 +125,9 @@ _PER_TYPE_FIELD_NAMES: Dict[str, Dict[str, str]] = {
 }
 
 
-def _validation_fields(document_type_value: str, response: Dict[str, Any]) -> Dict[str, Any]:
+def _validation_fields(document_type_value: str, merged: List[Any]) -> Dict[str, Any]:
     """
-    Translates the extraction service's fields into the rule sets' vocabulary.
+    Translates the merged field set into the rule sets' vocabulary.
 
     Extraction has already run — MRZ decoding for passports and visas,
     label matching over the OCR lines otherwise — and its `structured_fields` is
@@ -132,10 +136,18 @@ def _validation_fields(document_type_value: str, response: Dict[str, Any]) -> Di
     discard what the MRZ already established, which is how a passport whose name
     and dates were read correctly still came out as six missing required fields.
 
+    The input is the field list after both captures have been reconciled, so a
+    value the back supplied reaches the rules exactly as a front value does. The
+    rules are deliberately not told which side a field came from: a licence's
+    address is the licence's address, and a rule that treated back-sourced
+    values as second class would penalise documents for where they print things.
+
     A field neither source found stays absent rather than being guessed, so the
     rules report it missing — which is the truth about the document.
     """
-    structured = response.get("structured_fields") or {}
+    structured: Dict[str, Any] = {
+        entry.key: entry.value for entry in merged if getattr(entry, "value", None)
+    }
     fields: Dict[str, Any] = {}
 
     for source, target in _COMMON_FIELD_NAMES.items():
@@ -265,7 +277,40 @@ class ScreeningPipeline:
 
     # -- modules ---------------------------------------------------------
 
-    async def _run_ocr(self, case_id: str, document_type: Any, image: bytes) -> "OcrOutcome":
+    async def _extract_side(
+        self, document_type: Any, image: bytes, *, back: bool
+    ) -> Dict[str, Any]:
+        """Runs one capture through the extraction service, in-process."""
+        from fastapi import UploadFile
+
+        upstream_type = self._extraction.DocumentType(document_type.value)
+        endpoint = self._extraction.extract_back if back else self._extraction.extract
+        upload = UploadFile(
+            filename="document_back.jpg" if back else "document.jpg",
+            file=io.BytesIO(image),
+        )
+        response = await endpoint(
+            file=upload,
+            document_type=upstream_type,
+            save_debug=False,
+            assume_precropped=False,
+        )
+        if hasattr(response, "model_dump"):
+            return response.model_dump()
+        if hasattr(response, "body"):
+            # `/extract-back` answers with a JSONResponse rather than a model.
+            import json as _json
+
+            return _json.loads(response.body)
+        return dict(response)
+
+    async def _run_ocr(
+        self,
+        case_id: str,
+        document_type: Any,
+        image: bytes,
+        back_image: Optional[bytes] = None,
+    ) -> "OcrOutcome":
         """Extraction: orientation, U-Net detection, perspective warp, PP-OCRv5, MRZ/QR."""
         adapter = self.adapters.ocr_extraction
 
@@ -284,21 +329,27 @@ class ScreeningPipeline:
         # contract's, not a guess made here.
         supported, _ = self.contracts.supports(self.contracts.Module.OCR, document_type)
         if not supported:
-            return OcrOutcome(adapter.from_extract_response(case_id, document_type, {}), None)
+            outcome = adapter.from_extract_response(case_id, document_type, {})
+            return OcrOutcome(outcome.envelope, None, outcome.fields, outcome.checks)
 
         try:
-            from fastapi import UploadFile
+            body = await self._extract_side(document_type, image, back=False)
 
-            upload = UploadFile(filename="document.jpg", file=io.BytesIO(image))
-            upstream_type = self._extraction.DocumentType(document_type.value)
-            response = await self._extraction.extract(
-                file=upload,
-                document_type=upstream_type,
-                save_debug=False,
-                assume_precropped=False,
+            back_body = None
+            if back_image is not None:
+                try:
+                    back_body = await self._extract_side(document_type, back_image, back=True)
+                except Exception:
+                    # A back capture that fails must not cost the officer the
+                    # front's findings. The screening proceeds single-sided, and
+                    # the merge raises REVIEW for anything the back was expected
+                    # to carry.
+                    log.exception("Back-side extraction failed")
+
+            outcome = adapter.from_extract_response(
+                case_id, document_type, body, back=back_body
             )
-            body = response.model_dump() if hasattr(response, "model_dump") else dict(response)
-            return OcrOutcome(adapter.from_extract_response(case_id, document_type, body), body)
+            return OcrOutcome(outcome.envelope, body, outcome.fields, outcome.checks)
         except Exception:
             log.exception("Extraction failed")
             return OcrOutcome(
@@ -323,8 +374,7 @@ class ScreeningPipeline:
 
         # Rules run on extracted fields. With no fields there is nothing to
         # check, and reporting checks that never ran would be an invention.
-        raw = ocr.raw
-        if raw is None:
+        if not ocr.merged and ocr.raw is None:
             return adapter.unavailable(
                 case_id=case_id,
                 reason_code="NO_EXTRACTED_FIELDS",
@@ -334,15 +384,24 @@ class ScreeningPipeline:
         try:
             structured: Dict[str, Any] = {
                 "document_type": document_type.value,
-                "fields": _validation_fields(document_type.value, raw),
+                "fields": _validation_fields(document_type.value, ocr.merged),
             }
-            mrz = _validation_mrz(raw)
+            mrz = _validation_mrz(ocr.raw or {})
             if mrz:
                 structured["mrz"] = mrz
 
             validator = self._validator_module.DocumentValidator(rules_dir=self._rules_dir)
             output = validator.validate(structured)
-            return adapter.from_validator_output(case_id, document_type, output)
+            envelope = adapter.from_validator_output(case_id, document_type, output)
+
+            # The merge's findings — whether the two captures agreed, whether a
+            # code decoded — are rule outcomes from the officer's point of view,
+            # so they belong in the same list. They are appended rather than
+            # computed here: the policy that produced them lives in the contract
+            # package, and this only carries them across.
+            if ocr.checks and envelope.result is not None:
+                return adapter.with_extra_checks(envelope, ocr.checks)
+            return envelope
         except Exception:
             log.exception("Validation failed")
             return adapter.from_failure(
@@ -408,10 +467,20 @@ class ScreeningPipeline:
         document_type_value: str,
         document: bytes,
         person: bytes,
+        document_back: Optional[bytes] = None,
     ) -> Dict[str, Any]:
+        """
+        Screens one case.
+
+        `document_back` is optional throughout. A single-sided screening behaves
+        exactly as it did before two sides existed — every field comes off the
+        front and is marked SINGLE_SOURCE — so an officer who cannot photograph
+        the reverse is not blocked, and a document type whose back carries
+        nothing is not made to look incomplete.
+        """
         document_type = self.contracts.parse(document_type_value)
 
-        ocr = await self._run_ocr(case_id, document_type, document)
+        ocr = await self._run_ocr(case_id, document_type, document, document_back)
         validation = self._run_validation(case_id, document_type, ocr)
         face = self._run_face(case_id, document, person)
 

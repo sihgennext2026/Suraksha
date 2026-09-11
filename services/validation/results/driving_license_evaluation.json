@@ -1,0 +1,16 @@
+{
+  "document_type": "driving_license",
+  "input_file": "/home/workdir/artifacts/document_validation_service/evaluation_data/driving_license/case_001_ocr.json",
+  "evaluation": {
+    "total_cases": 1,
+    "passed_cases": 1,
+    "failed_cases": 0,
+    "review_cases": 0,
+    "score": 100.0,
+    "score_percent": 100.0,
+    "overall_status": "PASS"
+  },
+  "failed_cases": [],
+  "review_cases": [],
+  "result_file": "results/driving_license_evaluation.json"
+}

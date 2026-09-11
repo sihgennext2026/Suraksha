@@ -87,13 +87,13 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (!ready) return;
-    const theme = buildTheme(themePreference === 'light' ? 'light' : 'dark');
+    const theme = buildTheme(themePreference === 'dark' ? 'dark' : 'light');
     void SystemUI.setBackgroundColorAsync(theme.color.canvas);
     void SplashScreen.hideAsync();
   }, [ready, themePreference]);
 
   if (!ready) {
-    return <View style={[styles.root, { backgroundColor: '#0B1017' }]} />;
+    return <View style={[styles.root, { backgroundColor: '#F7F8FA' }]} />;
   }
 
   return (
@@ -101,7 +101,7 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <ThemeProvider preference={themePreference}>
-            <StatusBar style={themePreference === 'light' ? 'dark' : 'light'} />
+            <StatusBar style={themePreference === 'dark' ? 'light' : 'dark'} />
             <Stack
               screenOptions={{
                 // Every screen supplies its own header so that the eyebrow,

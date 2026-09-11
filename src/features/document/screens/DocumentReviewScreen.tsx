@@ -39,6 +39,7 @@ export function DocumentReviewScreen() {
 
   const { document } = activeCase;
   const descriptor = DOCUMENT_TYPE_DESCRIPTORS[document.declaredType];
+  const expectsBack = descriptor.hasBackFields;
 
   return (
     <>
@@ -83,6 +84,54 @@ export function DocumentReviewScreen() {
           call after the subject photograph is taken - so this screen asks the
           only question it can honestly ask: is this legible?
         */}
+        {/*
+          The reverse is offered here rather than forced into the sequence. Some
+          types carry nothing on the back that this pipeline reads, and an
+          officer at a counter may not get a second shot — so a missing reverse
+          resolves to REVIEW downstream, never to a failure.
+        */}
+        <Section
+          title="Reverse side"
+          description={
+            expectsBack
+              ? `The reverse of a ${descriptor.label.toLowerCase()} carries fields the front does not.`
+              : 'Optional for this document type.'
+          }
+        >
+          {document.backImage ? (
+            <>
+              <ZoomableImage
+                uri={document.backImage.uri}
+                aspectRatio={descriptor.captureAspectRatio}
+                accessibilityLabel={`Captured reverse of the ${descriptor.label.toLowerCase()}, pinch to zoom`}
+              />
+              <Button
+                label="Retake reverse"
+                onPress={() => router.push(ROUTES.screening.documentBackCapture)}
+                variant="secondary"
+                style={{ marginTop: theme.spacing.md }}
+              />
+            </>
+          ) : (
+            <>
+              <Button
+                label="Capture reverse"
+                onPress={() => router.push(ROUTES.screening.documentBackCapture)}
+                variant="secondary"
+                fullWidth
+                testID="document-review-capture-back"
+              />
+              {expectsBack ? (
+                <InlineNotice
+                  tone="info"
+                  title="Some fields are printed only on the reverse"
+                  message="Without it those fields are reported as needing confirmation rather than read. The screening still runs."
+                />
+              ) : null}
+            </>
+          )}
+        </Section>
+
         <Panel tone="sunken" style={{ marginTop: theme.spacing.lg }}>
           <Text role="label" tone="tertiary">
             Before you confirm

@@ -1,0 +1,10 @@
+{
+    "validation_passed": true,
+    "document_type": "nationalid",
+    "nationalid_validation": {
+        "is_valid": true,
+        "number": "367188913257",
+        "format_detected": "4-4-4 space grouping",
+        "error": null
+    }
+}

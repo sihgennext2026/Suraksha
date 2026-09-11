@@ -125,55 +125,67 @@ export const darkPalette: SemanticPalette = {
   skeleton: '#1B2634',
 };
 
+/**
+ * The default scheme.
+ *
+ * Tuned for a calm, product-grade surface rather than the high-contrast
+ * instrument look: a warm off-white ground so white cards lift off it without
+ * needing heavy borders, one confident indigo accent, and status colours that
+ * stay legible as small text on their own tinted backgrounds. Greys carry a
+ * slight blue cast so neutrals read as considered rather than muddy.
+ */
 export const lightPalette: SemanticPalette = {
-  canvas: '#EEF1F5',
+  canvas: '#F7F8FA',
   surface: '#FFFFFF',
   surfaceRaised: '#FFFFFF',
-  surfaceSunken: '#F3F5F8',
-  surfaceInverse: '#000000',
+  surfaceSunken: '#F1F3F7',
+  surfaceInverse: '#111827',
 
-  border: '#D7DEE6',
-  borderStrong: '#B4C0CC',
-  borderFocus: '#1D4ED8',
+  // Borders sit close to the ground tone: separation comes from elevation and
+  // whitespace, and a hard rule around every card is what makes an interface
+  // look like a form rather than a product.
+  border: '#E8EBF0',
+  borderStrong: '#D3D8E0',
+  borderFocus: '#4F46E5',
 
-  textPrimary: '#0F1923',
-  textSecondary: '#4A5C6E',
-  textTertiary: '#6F8296',
+  textPrimary: '#111827',
+  textSecondary: '#5A6474',
+  textTertiary: '#8A94A6',
   textInverse: '#FFFFFF',
   textOnAccent: '#FFFFFF',
 
-  accent: '#1D4ED8',
-  accentPressed: '#1E40AF',
-  accentSubtle: '#EAF0FE',
-  accentBorder: '#B9CDF6',
+  accent: '#4F46E5',
+  accentPressed: '#4338CA',
+  accentSubtle: '#EEF0FE',
+  accentBorder: '#C9CCF8',
 
-  positive: '#15803D',
-  positiveSubtle: '#E9F6EE',
-  positiveBorder: '#A8D8BB',
+  positive: '#047857',
+  positiveSubtle: '#ECFDF5',
+  positiveBorder: '#A7E8CD',
 
-  caution: '#A15C07',
-  cautionSubtle: '#FDF3E2',
-  cautionBorder: '#EBCE96',
+  caution: '#B45309',
+  cautionSubtle: '#FFF8EB',
+  cautionBorder: '#F2D9A8',
 
-  critical: '#B91C1C',
-  criticalPressed: '#991B1B',
-  criticalSubtle: '#FCECEC',
-  criticalBorder: '#EFB4B4',
+  critical: '#DC2626',
+  criticalPressed: '#B91C1C',
+  criticalSubtle: '#FEF2F2',
+  criticalBorder: '#F6C2C2',
 
-  info: '#1D4ED8',
-  infoSubtle: '#EAF0FE',
-  infoBorder: '#B9CDF6',
+  info: '#4F46E5',
+  infoSubtle: '#EEF0FE',
+  infoBorder: '#C9CCF8',
 
-  neutral: '#607287',
-  neutralSubtle: '#F0F3F6',
-  neutralBorder: '#CFD8E1',
+  neutral: '#6B7280',
+  neutralSubtle: '#F3F4F8',
+  neutralBorder: '#E2E6ED',
 
-  scrim: 'rgba(15, 25, 35, 0.55)',
-  overlay: 'rgba(15, 25, 35, 0.35)',
+  scrim: 'rgba(17, 24, 39, 0.45)',
+  overlay: 'rgba(17, 24, 39, 0.28)',
 
-  heatLow: 'rgba(29, 78, 216, 0.22)',
-  heatMedium: 'rgba(161, 92, 7, 0.28)',
-  heatHigh: 'rgba(185, 28, 28, 0.34)',
+  heatLow: 'rgba(79, 70, 229, 0.18)',
+  heatMedium: 'rgba(180, 83, 9, 0.24)',
+  heatHigh: 'rgba(220, 38, 38, 0.30)',
 
-  skeleton: '#E3E8ED',
+  skeleton: '#EDEFF3',
 };

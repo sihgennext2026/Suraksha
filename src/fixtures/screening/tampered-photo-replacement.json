@@ -13,39 +13,54 @@
       "document_type": "national_id",
       "fields": [
         {
-          "key": "surname",
-          "value": "LIMBU",
-          "source": "label_same_line",
-          "confidence": null,
-          "region": null
-        },
-        {
-          "key": "given_names",
-          "value": "DEEPAK",
-          "source": "label_same_line",
-          "confidence": null,
-          "region": null
-        },
-        {
-          "key": "id_number",
-          "value": "NID884120",
-          "source": "label_same_line",
-          "confidence": null,
-          "region": null
-        },
-        {
           "key": "date_of_birth",
           "value": "1993-02-05",
           "source": "label_same_line",
           "confidence": null,
-          "region": null
+          "region": null,
+          "origin": "front",
+          "agreement": "SINGLE_SOURCE",
+          "readings": []
         },
         {
           "key": "date_of_expiry",
           "value": "2028-05-29",
           "source": "label_same_line",
           "confidence": null,
-          "region": null
+          "region": null,
+          "origin": "front",
+          "agreement": "SINGLE_SOURCE",
+          "readings": []
+        },
+        {
+          "key": "given_names",
+          "value": "DEEPAK",
+          "source": "label_same_line",
+          "confidence": null,
+          "region": null,
+          "origin": "front",
+          "agreement": "SINGLE_SOURCE",
+          "readings": []
+        },
+        {
+          "key": "id_number",
+          "value": "NID884120",
+          "source": "label_same_line",
+          "confidence": null,
+          "region": null,
+          "origin": "front",
+          "agreement": "SINGLE_SOURCE",
+          "readings": []
+        },
+        {
+          "key": "surname",
+          "value": "LIMBU",
+          "source": "label_same_line",
+          "confidence": null,
+          "region": null,
+          "origin": "front",
+          "agreement": "SINGLE_SOURCE",
+          "readings": []
         }
       ],
       "mrz": {
@@ -69,7 +84,33 @@
         "orientation_corrected": true
       },
       "overall_confidence": 0.9,
-      "language": "latin"
+      "language": "latin",
+      "sides": [
+        {
+          "side": "front",
+          "detection": {
+            "detected": true,
+            "confidence": 0.98,
+            "box": [
+              0.062,
+              0.118,
+              0.876,
+              0.694
+            ],
+            "correction_mode": "segmentation_quad_warp",
+            "orientation_corrected": true
+          },
+          "language": "latin",
+          "field_keys": [
+            "date_of_birth",
+            "date_of_expiry",
+            "given_names",
+            "id_number",
+            "surname"
+          ]
+        }
+      ],
+      "machine_codes": []
     },
     "errors": [],
     "duration_ms": null

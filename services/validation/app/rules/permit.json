@@ -1,0 +1,17 @@
+{
+  "document_type": "permit",
+  "required_fields": [
+    "name",
+    "permit_number",
+    "permit_type",
+    "date_of_issue",
+    "date_of_expiry"
+  ],
+  "optional_fields": [
+    "nationality",
+    "employer",
+    "address"
+  ],
+  "expiry_required": true,
+  "date_format": "YYYY-MM-DD"
+}

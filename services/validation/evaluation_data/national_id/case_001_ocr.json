@@ -1,0 +1,22 @@
+{
+  "detected": true,
+  "detection_confidence": 0.94,
+  "detection_box": [60, 80, 700, 850],
+  "correction_mode": "cv_contour_warp",
+  "lines": [
+    {"text": "GOVERNMENT OF INDIA", "confidence": 0.98},
+    {"text": "AADHAAR", "confidence": 0.97},
+    {"text": "Name:", "confidence": 0.96},
+    {"text": "RAJESH KUMAR", "confidence": 0.97},
+    {"text": "Date of Birth: 12-07-1985", "confidence": 0.95},
+    {"text": "Gender: MALE", "confidence": 0.96},
+    {"text": "Aadhaar Number", "confidence": 0.94},
+    {"text": "123456789012", "confidence": 0.98},
+    {"text": "Address:", "confidence": 0.95},
+    {"text": "45 NEHRU NAGAR NEW DELHI 110001", "confidence": 0.94}
+  ],
+  "full_text": "GOVERNMENT OF INDIA AADHAAR Name: RAJESH KUMAR Date of Birth: 12-07-1985 Gender: MALE Aadhaar Number 123456789012 Address: 45 NEHRU NAGAR NEW DELHI 110001",
+  "average_confidence": 0.96,
+  "timings_ms": {"detection_ms": 180, "correction_ms": 12, "ocr_ms": 800, "total_ms": 992},
+  "message": null
+}

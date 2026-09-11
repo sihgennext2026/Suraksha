@@ -103,12 +103,42 @@ export type BoundingBox = readonly [number, number, number, number];
 // OCR
 // ---------------------------------------------------------------------------
 
+/** How a value was read off the image. */
 export type OcrFieldSource =
   | 'mrz'
   | 'label_same_line'
   | 'label_next_line'
   | 'standalone_id'
+  | 'qr'
+  | 'barcode'
   | 'not_found';
+
+/**
+ * Which capture or code the value was accepted from — a separate axis from
+ * `source`. An officer resolving a disagreement needs to know which side a
+ * value came off, and a signed code carries a different authority from a label
+ * match over recognised text.
+ */
+export type OcrFieldOrigin = 'front' | 'back' | 'mrz' | 'qr';
+
+/**
+ * Whether the sources that supplied a field agreed.
+ *
+ * `CONFLICT` is never a fraud finding on its own. Two captures of one document
+ * disagree for ordinary reasons — glare, a fold, a single OCR substitution —
+ * and the officer is holding the document. It resolves to REVIEW, never FAIL.
+ */
+export type OcrFieldAgreement = 'SINGLE_SOURCE' | 'AGREED' | 'CONFLICT';
+
+export type DocumentSide = 'front' | 'back';
+
+/** One source's reading, retained so a disagreement shows both values. */
+export interface OcrFieldReading {
+  origin: OcrFieldOrigin;
+  value: string | null;
+  source: OcrFieldSource;
+  confidence?: number | null;
+}
 
 export interface OcrField {
   key: string;
@@ -121,6 +151,35 @@ export interface OcrField {
    */
   source: OcrFieldSource;
   region?: BoundingBox | null;
+  origin?: OcrFieldOrigin;
+  agreement?: OcrFieldAgreement;
+  /** Populated only where more than one source supplied a value. */
+  readings?: OcrFieldReading[];
+}
+
+/**
+ * A machine-readable code found on one side.
+ *
+ * `decoded` is null when a code was located but its payload could not be read —
+ * an absence, not a finding.
+ */
+export interface MachineCode {
+  side: DocumentSide;
+  code_type: 'qr' | 'barcode';
+  format?: string | null;
+  decoded: string | null;
+  detection_method?: string | null;
+}
+
+/**
+ * What one capture produced. A side the officer did not capture is absent from
+ * the list rather than present and empty.
+ */
+export interface SideEvidence {
+  side: DocumentSide;
+  detection: OcrDetection;
+  language?: string | null;
+  field_keys?: string[];
 }
 
 export interface MrzCheckDigit {
@@ -156,9 +215,12 @@ export interface OcrResult {
   document_type: DocumentType;
   fields: OcrField[];
   mrz: MrzPayload;
+  /** The front capture's detection; per-side detail is in `sides`. */
   detection: OcrDetection;
   overall_confidence: number | null;
   language?: string | null;
+  sides?: SideEvidence[];
+  machine_codes?: MachineCode[];
 }
 
 // ---------------------------------------------------------------------------

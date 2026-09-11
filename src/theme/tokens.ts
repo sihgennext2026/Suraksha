@@ -22,16 +22,21 @@ export const spacing = {
 } as const;
 
 /**
- * Deliberately tight radii. Field/security equipment reads as precise, not soft.
- * Nothing in this application uses a pill radius except explicit status chips.
+ * Rounded enough to read as a product surface rather than an instrument panel.
+ *
+ * The scale is proportional: small controls take `sm`/`md`, cards and panels
+ * take `lg`/`xl`, and sheets take `xxl`. Radii that do not scale with the
+ * element are what make an interface look assembled from parts — a 6pt corner
+ * on a 240pt card reads as an oversight.
  */
 export const radii = {
   none: 0,
-  xs: 2,
-  sm: 4,
-  md: 6,
-  lg: 8,
-  xl: 12,
+  xs: 4,
+  sm: 6,
+  md: 10,
+  lg: 14,
+  xl: 18,
+  xxl: 24,
   pill: 999,
 } as const;
 

@@ -13,67 +13,94 @@
       "document_type": "passport",
       "fields": [
         {
-          "key": "surname",
-          "value": "RAHMAN",
-          "source": "mrz",
-          "confidence": null,
-          "region": null
-        },
-        {
-          "key": "given_names",
-          "value": "IMRAN",
-          "source": "mrz",
-          "confidence": null,
-          "region": null
-        },
-        {
-          "key": "passport_number",
-          "value": "B0473913",
-          "source": "mrz",
-          "confidence": null,
-          "region": null
-        },
-        {
-          "key": "nationality",
-          "value": "BGD",
-          "source": "mrz",
-          "confidence": null,
-          "region": null
-        },
-        {
           "key": "date_of_birth",
           "value": "1991-06-22",
           "source": "mrz",
           "confidence": null,
-          "region": null
-        },
-        {
-          "key": "sex",
-          "value": "M",
-          "source": "mrz",
-          "confidence": null,
-          "region": null
-        },
-        {
-          "key": "date_of_issue",
-          "value": "2019-02-11",
-          "source": "mrz",
-          "confidence": null,
-          "region": null
+          "region": null,
+          "origin": "mrz",
+          "agreement": "SINGLE_SOURCE",
+          "readings": []
         },
         {
           "key": "date_of_expiry",
           "value": "2029-02-10",
           "source": "mrz",
           "confidence": null,
-          "region": null
+          "region": null,
+          "origin": "mrz",
+          "agreement": "SINGLE_SOURCE",
+          "readings": []
+        },
+        {
+          "key": "date_of_issue",
+          "value": "2019-02-11",
+          "source": "mrz",
+          "confidence": null,
+          "region": null,
+          "origin": "mrz",
+          "agreement": "SINGLE_SOURCE",
+          "readings": []
+        },
+        {
+          "key": "given_names",
+          "value": "IMRAN",
+          "source": "mrz",
+          "confidence": null,
+          "region": null,
+          "origin": "mrz",
+          "agreement": "SINGLE_SOURCE",
+          "readings": []
+        },
+        {
+          "key": "nationality",
+          "value": "BGD",
+          "source": "mrz",
+          "confidence": null,
+          "region": null,
+          "origin": "mrz",
+          "agreement": "SINGLE_SOURCE",
+          "readings": []
+        },
+        {
+          "key": "passport_number",
+          "value": "B0473913",
+          "source": "mrz",
+          "confidence": null,
+          "region": null,
+          "origin": "mrz",
+          "agreement": "SINGLE_SOURCE",
+          "readings": []
         },
         {
           "key": "place_of_birth",
           "value": "SYLHET",
           "source": "label_same_line",
           "confidence": null,
-          "region": null
+          "region": null,
+          "origin": "front",
+          "agreement": "SINGLE_SOURCE",
+          "readings": []
+        },
+        {
+          "key": "sex",
+          "value": "M",
+          "source": "mrz",
+          "confidence": null,
+          "region": null,
+          "origin": "mrz",
+          "agreement": "SINGLE_SOURCE",
+          "readings": []
+        },
+        {
+          "key": "surname",
+          "value": "RAHMAN",
+          "source": "mrz",
+          "confidence": null,
+          "region": null,
+          "origin": "mrz",
+          "agreement": "SINGLE_SOURCE",
+          "readings": []
         }
       ],
       "mrz": {
@@ -100,7 +127,37 @@
         "orientation_corrected": true
       },
       "overall_confidence": 0.81,
-      "language": "latin"
+      "language": "latin",
+      "sides": [
+        {
+          "side": "front",
+          "detection": {
+            "detected": true,
+            "confidence": 0.98,
+            "box": [
+              0.062,
+              0.118,
+              0.876,
+              0.694
+            ],
+            "correction_mode": "segmentation_quad_warp",
+            "orientation_corrected": true
+          },
+          "language": "latin",
+          "field_keys": [
+            "date_of_birth",
+            "date_of_expiry",
+            "date_of_issue",
+            "given_names",
+            "nationality",
+            "passport_number",
+            "place_of_birth",
+            "sex",
+            "surname"
+          ]
+        }
+      ],
+      "machine_codes": []
     },
     "errors": [],
     "duration_ms": null

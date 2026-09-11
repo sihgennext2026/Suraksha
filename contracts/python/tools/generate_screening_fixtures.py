@@ -120,7 +120,7 @@ def ocr(
             "detected_lang_family": "latin",
         },
         image_size=(1000, 1000),
-    )
+    ).envelope
 
 
 def validation(case_id: str, document_type: DocumentType, checks: List[Dict[str, Any]]) -> Any:
@@ -336,7 +336,7 @@ def build(case_id: str, name: str) -> Dict[str, Any]:
             DocumentType.TRAVEL_AUTHORIZATION,
             ocr=ocr_extraction.from_extract_response(
                 case_id, DocumentType.TRAVEL_AUTHORIZATION, {"detected": True}
-            ),
+            ).envelope,
             validation=validation_rules.from_validator_output(
                 case_id, DocumentType.TRAVEL_AUTHORIZATION, {"rules": []}
             ),

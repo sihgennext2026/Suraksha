@@ -16,6 +16,7 @@ export const ROUTES = {
   screening: {
     documentType: '/screening/document-type',
     documentCapture: '/screening/document-capture',
+    documentBackCapture: '/screening/document-back-capture',
     documentReview: '/screening/document-review',
     personCapture: '/screening/person-capture',
     progress: '/screening/progress',

@@ -1,0 +1,23 @@
+# Model weights are stored in Git LFS.
+#
+# These are the only three weight formats actually present in the tree, and the
+# patterns are deliberately explicit rather than a blanket rule over binaries:
+# a catch-all would sweep in icons, captures and fixtures, which belong in Git
+# proper where they can be diffed and served without an LFS fetch.
+#
+#   *.onnx        ONNX graphs — the ArcFace/SCRFD family and the document
+#                 detector. Individually up to 167 MB.
+#   *.onnx.data   External-tensor sidecar for an ONNX graph too large to inline.
+#                 Not matched by *.onnx, which is why it is listed separately.
+#   *.pdiparams   PaddlePaddle inference weights for the PP-OCRv5 models.
+#
+# Several vendored service directories carry their own .gitattributes with
+# overlapping rules. Those still apply; this file exists so that coverage does
+# not depend on them — the two PaddleOCR weight files under
+# reference/extraction-experiments/models/ sat outside every vendored rule and
+# were being stored as ~84 MB raw blobs until this was added.
+#
+# A fresh clone needs `git lfs pull` before the screening service will start.
+*.onnx      filter=lfs diff=lfs merge=lfs -text
+*.onnx.data filter=lfs diff=lfs merge=lfs -text
+*.pdiparams filter=lfs diff=lfs merge=lfs -text

@@ -1,0 +1,20 @@
+{
+  "document_type": "driving_license",
+  "required_fields": [
+    "name",
+    "license_number",
+    "date_of_birth",
+    "date_of_issue",
+    "date_of_expiry"
+  ],
+  "optional_fields": [
+    "blood_group",
+    "organ_donor",
+    "parent_name",
+    "address",
+    "license_class"
+  ],
+  "expiry_required": true,
+  "date_format": "YYYY-MM-DD",
+  "license_number_pattern": "^[A-Z]{2}[0-9A-Z]{8,18}$"
+}

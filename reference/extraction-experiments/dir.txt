@@ -1,0 +1,222 @@
+Folder PATH listing for volume New Volume
+Volume serial number is 000000BE 9A41:EF7B
+D:.
+|   dir.txt
+|   
++---.paddlex
+|   +---func_ret
+|   +---locks
+|   |   \---official_models
+|   +---official_models
+|   |   +---PP-LCNet_x1_0_textline_ori
+|   |   |   |   .gitattributes
+|   |   |   |   config.json
+|   |   |   |   inference.json
+|   |   |   |   inference.pdiparams
+|   |   |   |   inference.yml
+|   |   |   |   README.md
+|   |   |   |   
+|   |   |   \---.cache
+|   |   |       \---huggingface
+|   |   |           |   .gitignore
+|   |   |           |   CACHEDIR.TAG
+|   |   |           |   
+|   |   |           +---download
+|   |   |           |       .gitattributes.metadata
+|   |   |           |       config.json.metadata
+|   |   |           |       inference.json.metadata
+|   |   |           |       inference.pdiparams.metadata
+|   |   |           |       inference.yml.metadata
+|   |   |           |       README.md.metadata
+|   |   |           |       
+|   |   |           \---trees
+|   |   |                   cd237a44b0e359d4fe38310a416203cf7403faa5.json
+|   |   |                   
+|   |   +---PP-OCRv5_mobile_det
+|   |   |   |   .gitattributes
+|   |   |   |   config.json
+|   |   |   |   inference.json
+|   |   |   |   inference.pdiparams
+|   |   |   |   inference.yml
+|   |   |   |   README.md
+|   |   |   |   
+|   |   |   \---.cache
+|   |   |       \---huggingface
+|   |   |           |   .gitignore
+|   |   |           |   CACHEDIR.TAG
+|   |   |           |   
+|   |   |           +---download
+|   |   |           |       .gitattributes.metadata
+|   |   |           |       config.json.metadata
+|   |   |           |       inference.json.metadata
+|   |   |           |       inference.pdiparams.metadata
+|   |   |           |       inference.yml.metadata
+|   |   |           |       README.md.metadata
+|   |   |           |       
+|   |   |           \---trees
+|   |   |                   0d63e78e2b680928f6b1747d76a08db6e645efb7.json
+|   |   |                   
+|   |   +---PP-OCRv5_mobile_rec
+|   |   |   |   .gitattributes
+|   |   |   |   config.json
+|   |   |   |   inference.json
+|   |   |   |   inference.pdiparams
+|   |   |   |   inference.yml
+|   |   |   |   README.md
+|   |   |   |   
+|   |   |   \---.cache
+|   |   |       \---huggingface
+|   |   |           |   .gitignore
+|   |   |           |   CACHEDIR.TAG
+|   |   |           |   
+|   |   |           +---download
+|   |   |           |       .gitattributes.metadata
+|   |   |           |       config.json.metadata
+|   |   |           |       inference.json.metadata
+|   |   |           |       inference.pdiparams.metadata
+|   |   |           |       inference.yml.metadata
+|   |   |           |       README.md.metadata
+|   |   |           |       
+|   |   |           \---trees
+|   |   |                   682f20538d8c086cb2128e5cfac775e6c4904e85.json
+|   |   |                   
+|   |   +---PP-OCRv5_server_det
+|   |   |   |   .gitattributes
+|   |   |   |   config.json
+|   |   |   |   inference.json
+|   |   |   |   inference.pdiparams
+|   |   |   |   inference.yml
+|   |   |   |   README.md
+|   |   |   |   
+|   |   |   \---.cache
+|   |   |       \---huggingface
+|   |   |           |   .gitignore
+|   |   |           |   CACHEDIR.TAG
+|   |   |           |   
+|   |   |           +---download
+|   |   |           |       .gitattributes.metadata
+|   |   |           |       config.json.metadata
+|   |   |           |       inference.json.metadata
+|   |   |           |       inference.pdiparams.metadata
+|   |   |           |       inference.yml.metadata
+|   |   |           |       README.md.metadata
+|   |   |           |       
+|   |   |           \---trees
+|   |   |                   ca867c897ecbca8873081573a802ad70d499cb94.json
+|   |   |                   
+|   |   \---PP-OCRv5_server_rec
+|   |       |   .gitattributes
+|   |       |   config.json
+|   |       |   inference.json
+|   |       |   inference.pdiparams
+|   |       |   inference.yml
+|   |       |   README.md
+|   |       |   
+|   |       \---.cache
+|   |           \---huggingface
+|   |               |   .gitignore
+|   |               |   CACHEDIR.TAG
+|   |               |   
+|   |               +---download
+|   |               |       .gitattributes.metadata
+|   |               |       config.json.metadata
+|   |               |       inference.json.metadata
+|   |               |       inference.pdiparams.metadata
+|   |               |       inference.yml.metadata
+|   |               |       README.md.metadata
+|   |               |       
+|   |               \---trees
+|   |                       b26c3587fda8da3c8ec0ce357214b4d661ff1558.json
+|   |                       
+|   \---temp
++---api_debug_output
+|       01_alb_id__HS__HS01_02_1787743125__chosen_contour.jpg
+|       01_alb_id__HS__HS01_02_1787743125__corrected.jpg
+|       01_alb_id__HS__HS01_02_1787743125__original.jpg
+|       01_alb_id__HS__HS01_02_1787743125__threshold.jpg
+|       01_alb_id__HS__HS01_04_1787745063__chosen_contour.jpg
+|       01_alb_id__HS__HS01_04_1787745063__corrected.jpg
+|       01_alb_id__HS__HS01_04_1787745063__original.jpg
+|       01_alb_id__HS__HS01_04_1787745063__threshold.jpg
+|       01_alb_id__HS__HS01_10_1787743490__chosen_contour.jpg
+|       01_alb_id__HS__HS01_10_1787743490__corrected.jpg
+|       01_alb_id__HS__HS01_10_1787743490__original.jpg
+|       01_alb_id__HS__HS01_10_1787743490__threshold.jpg
+|       02_aut_drvlic_new__CS__CS02_10_1787745265__chosen_contour.jpg
+|       02_aut_drvlic_new__CS__CS02_10_1787745265__corrected.jpg
+|       02_aut_drvlic_new__CS__CS02_10_1787745265__original.jpg
+|       02_aut_drvlic_new__CS__CS02_10_1787745265__threshold.jpg
+|       05_aze_passport__CA__CA05_01_1787823952__chosen_contour.jpg
+|       05_aze_passport__CA__CA05_01_1787823952__corrected.jpg
+|       05_aze_passport__CA__CA05_01_1787823952__original.jpg
+|       05_aze_passport__CA__CA05_01_1787823952__threshold.jpg
+|       document 2_1787827561__chosen_contour.jpg
+|       document 2_1787827561__corrected.jpg
+|       document 2_1787827561__original.jpg
+|       document 2_1787827561__threshold.jpg
+|       document 2_1787838266__chosen_contour.jpg
+|       document 2_1787838266__corrected.jpg
+|       document 2_1787838266__original.jpg
+|       document 2_1787838266__threshold.jpg
+|       document 2_1787850123__chosen_contour.jpg
+|       document 2_1787850123__corrected.jpg
+|       document 2_1787850123__original.jpg
+|       document 2_1787850123__threshold.jpg
+|       document 2_1787884796__chosen_contour.jpg
+|       document 2_1787884796__corrected.jpg
+|       document 2_1787884796__original.jpg
+|       document 2_1787884796__threshold.jpg
+|       document 3_1787827642__chosen_contour.jpg
+|       document 3_1787827642__corrected.jpg
+|       document 3_1787827642__original.jpg
+|       document 3_1787827642__threshold.jpg
+|       document_1787826899__chosen_contour.jpg
+|       document_1787826899__corrected.jpg
+|       document_1787826899__original.jpg
+|       document_1787826899__threshold.jpg
+|       k document_1787886265__chosen_contour.jpg
+|       k document_1787886265__corrected.jpg
+|       k document_1787886265__original.jpg
+|       k document_1787886265__threshold.jpg
+|       k document_1787886323__chosen_contour.jpg
+|       k document_1787886323__corrected.jpg
+|       k document_1787886323__original.jpg
+|       k document_1787886323__threshold.jpg
+|       
++---Fast api
+|   |   .gitignore
+|   |   README.md
+|   |   requirements.txt
+|   |   
+|   \---app
+|       |   config.py
+|       |   detector.py
+|       |   main.py
+|       |   ocr.py
+|       |   perspective.py
+|       |   schemas.py
+|       |   
+|       \---__pycache__
+|               config.cpython-313.pyc
+|               detector.cpython-313.pyc
+|               main.cpython-313.pyc
+|               ocr.cpython-313.pyc
+|               perspective.cpython-313.pyc
+|               schemas.cpython-313.pyc
+|               
+\---models
+    +---document_detector
+    |       best.onnx
+    |       
+    +---PP-OCRv5_server_det_infer
+    |   \---PP-OCRv5_server_det_infer
+    |           inference.json
+    |           inference.pdiparams
+    |           inference.yml
+    |           
+    \---PP-OCRv5_server_rec_infer
+        \---PP-OCRv5_server_rec_infer
+                inference.json
+                inference.pdiparams
+                inference.yml
+                

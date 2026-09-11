@@ -43,6 +43,7 @@ import { Button } from '@/components/primitives/Button';
 import { EmptyState, ErrorState } from '@/components/feedback/States';
 import { __resetDatabaseForTests } from '@/db';
 import { LoginScreen } from '@/features/auth/screens/LoginScreen';
+import { OcrDetails } from '@/features/ocr/components/OcrDetails';
 import { DocumentTypeScreen } from '@/features/screening/screens/DocumentTypeScreen';
 import { useAuthStore } from '@/stores/authStore';
 import { createInitialStages, useScreeningStore } from '@/stores/screeningStore';
@@ -335,5 +336,115 @@ describe('document type screen', () => {
   it('marks which document types carry a machine-readable zone', () => {
     renderWithProviders(<DocumentTypeScreen />);
     expect(screen.getAllByText('MRZ').length).toBeGreaterThan(0);
+  });
+});
+
+describe('two-sided extraction detail', () => {
+  function ocrResult(fields: unknown[]): never {
+    return {
+      document_type: 'driving_license',
+      fields,
+      mrz: { present: false, format: 'NONE', lines: [], check_digits: [], checksum_valid: null },
+      detection: { detected: true, confidence: 0.97, orientation_corrected: false },
+      overall_confidence: 0.9,
+      sides: [
+        { side: 'front', detection: { detected: true }, field_keys: ['name'] },
+        { side: 'back', detection: { detected: true }, field_keys: ['address'] },
+      ],
+      machine_codes: [],
+    } as never;
+  }
+
+  const envelope = {
+    schema_version: '1.0',
+    case_id: 'SSB-2026-0001',
+    module: 'ocr',
+    status: 'SUCCESS',
+    model_version: 'test',
+    timestamp: '2026-09-11T10:00:00.000Z',
+    errors: [],
+  } as never;
+
+  it('says which side a value was read from', () => {
+    const result = ocrResult([
+      {
+        key: 'address',
+        value: '12 Main Street',
+        source: 'label_next_line',
+        origin: 'back',
+        agreement: 'SINGLE_SOURCE',
+        readings: [],
+      },
+    ]);
+
+    renderWithProviders(<OcrDetails envelope={envelope} result={result} />);
+
+    expect(screen.getByText('12 Main Street')).toBeTruthy();
+    // An officer confirming a value needs to know which face to turn over.
+    expect(screen.getByText(/on the back/i)).toBeTruthy();
+  });
+
+  it('shows both readings when the sides disagree, not a winner', () => {
+    const result = ocrResult([
+      {
+        key: 'name',
+        value: 'RAVI KUMAR',
+        source: 'label_same_line',
+        origin: 'front',
+        agreement: 'CONFLICT',
+        readings: [
+          { origin: 'front', value: 'RAVI KUMAR', source: 'label_same_line' },
+          { origin: 'back', value: 'RAVI KUMARI', source: 'label_next_line' },
+        ],
+      },
+    ]);
+
+    renderWithProviders(<OcrDetails envelope={envelope} result={result} />);
+
+    // The disagreement is the finding; hiding the losing reading would hide
+    // exactly what the officer is being asked to settle.
+    const hint = screen.getByText(/Sources disagree/);
+    expect(hint).toBeTruthy();
+    expect(hint.props.children).toContain('RAVI KUMARI');
+  });
+
+  it('confirms agreement rather than staying silent about it', () => {
+    const result = ocrResult([
+      {
+        key: 'document_number',
+        value: 'DL-0120',
+        source: 'label_same_line',
+        origin: 'front',
+        agreement: 'AGREED',
+        readings: [
+          { origin: 'front', value: 'DL-0120', source: 'label_same_line' },
+          { origin: 'back', value: 'DL-0120', source: 'label_same_line' },
+        ],
+      },
+    ]);
+
+    renderWithProviders(<OcrDetails envelope={envelope} result={result} />);
+    expect(screen.getByText(/matches the other side/i)).toBeTruthy();
+  });
+
+  it('does not mention a side on a front-only screening', () => {
+    const result = ocrResult([
+      {
+        key: 'name',
+        value: 'RAVI KUMAR',
+        source: 'mrz',
+        origin: 'mrz',
+        agreement: 'SINGLE_SOURCE',
+        readings: [],
+      },
+    ]);
+
+    renderWithProviders(<OcrDetails envelope={envelope} result={result} />);
+    // Every field comes off the front when there is only one capture, so the
+    // suffix would be noise on every row.
+    expect(screen.queryByText(/on the front/i)).toBeNull();
+    // The MRZ section names it too, so match the field hint exactly rather
+    // than any mention of the zone.
+    expect(screen.getByText('From the machine-readable zone')).toBeTruthy();
   });
 });

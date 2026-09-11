@@ -2,7 +2,7 @@ import type { ScreeningCaseResult } from '@/contracts';
 import { ScreeningServiceError } from '@/types';
 import type { CapturedImage } from '@/types/document';
 import { normaliseServiceUrl, resolveScreeningServiceUrl } from '@/config/screeningService';
-import { HttpScreeningService } from '@/services/ai/httpScreeningService';
+import { HttpScreeningService, checkScreeningService } from '@/services/ai/httpScreeningService';
 import { getScreeningService, isUsingRealScreening } from '@/services/ai/registry';
 import { MockScreeningService } from '@/services/mock/mockScreeningService';
 import { SCREENING_STAGE_ORDER } from '@/types/case';
@@ -162,5 +162,108 @@ describe('http screening service', () => {
     const service = new HttpScreeningService({ baseUrl: 'http://10.0.0.5:8000' });
 
     await expect(service.screen(buildRequest())).rejects.toThrow(/503/);
+  });
+});
+
+describe('reachability check', () => {
+  const fetchMock = jest.fn();
+
+  beforeEach(() => {
+    fetchMock.mockReset();
+    (global as unknown as { fetch: unknown }).fetch = fetchMock;
+  });
+
+  it('reports which modules the service can actually run', async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        status: 'ok',
+        modules: {
+          ocr: { available: true, reason: null },
+          document_forensics: { available: false, reason: 'DINOv2 is not implemented.' },
+        },
+      }),
+    });
+
+    const health = await checkScreeningService('http://10.0.0.5:8000');
+
+    expect(health.reachable).toBe(true);
+    if (!health.reachable) throw new Error('expected the service to be reachable');
+    expect(health.modules).toEqual([
+      { module: 'ocr', available: true, reason: null },
+      { module: 'document_forensics', available: false, reason: 'DINOv2 is not implemented.' },
+    ]);
+  });
+
+  it('does not claim reachable when nothing is configured', async () => {
+    const health = await checkScreeningService(null);
+
+    expect(health.reachable).toBe(false);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('explains an unreachable service in terms the officer can act on', async () => {
+    // This is the case that matters: the laptop moved to a different network,
+    // so the saved address is stale and the app would otherwise fall back to
+    // replaying a document with no visible sign anything was wrong.
+    fetchMock.mockRejectedValue(new Error('Network request failed'));
+
+    const health = await checkScreeningService('http://10.0.0.5:8000');
+
+    expect(health.reachable).toBe(false);
+    if (health.reachable) throw new Error('expected the service to be unreachable');
+    expect(health.reason).toMatch(/address/i);
+    expect(health.reason).toMatch(/same network/i);
+    // The raw transport error is never surfaced; it tells an officer nothing.
+    expect(health.reason).not.toMatch(/Network request failed/);
+  });
+
+  it('treats a non-200 answer as not reachable', async () => {
+    fetchMock.mockResolvedValue({ ok: false, status: 503, json: async () => ({}) });
+
+    const health = await checkScreeningService('http://10.0.0.5:8000');
+
+    expect(health.reachable).toBe(false);
+    if (health.reachable) throw new Error('expected the service to be unreachable');
+    expect(health.reason).toMatch(/503/);
+  });
+});
+
+describe('front and back captures', () => {
+  const fetchMock = jest.fn();
+
+  beforeEach(() => {
+    fetchMock.mockReset();
+    (global as unknown as { fetch: unknown }).fetch = fetchMock;
+    fetchMock.mockResolvedValue({ ok: true, json: async () => DOCUMENT });
+  });
+
+  function uploadedKeys(): string[] {
+    const [, init] = fetchMock.mock.calls[0] as [string, { body: FormData }];
+    const body = init.body as unknown as {
+      _parts?: [string, unknown][];
+      keys?: () => Iterable<string>;
+    };
+    return body._parts ? body._parts.map(([key]) => key) : Array.from(body.keys?.() ?? []);
+  }
+
+  it('uploads the reverse when the officer captured one', async () => {
+    const service = new HttpScreeningService({ baseUrl: 'http://10.0.0.5:8000' });
+
+    await service.screen(
+      buildRequest({ documentBackImage: { ...CAPTURE, uri: 'file:///captures/back.jpg' } }),
+    );
+
+    expect(uploadedKeys()).toContain('document_back');
+  });
+
+  it('omits it entirely when there is no reverse capture', async () => {
+    const service = new HttpScreeningService({ baseUrl: 'http://10.0.0.5:8000' });
+
+    await service.screen(buildRequest());
+
+    // Not an empty part: the service distinguishes "no back capture" from "a
+    // back capture that read nothing", and an empty upload would collapse them.
+    expect(uploadedKeys()).not.toContain('document_back');
   });
 });

@@ -47,6 +47,7 @@ interface BuildOptions {
   id?: string;
   documentType?: DocumentType;
   result?: ScreeningCaseResult | null;
+  backImage?: CapturedImage | null;
   status?: ScreeningCase['status'];
   decision?: ScreeningCase['decision'];
   sync?: Partial<ScreeningCase['sync']>;
@@ -80,6 +81,7 @@ export function buildCase(options: BuildOptions = {}): ScreeningCase {
       caseId: id,
       declaredType: options.documentType ?? result?.document_type ?? 'passport',
       image: DOCUMENT_IMAGE,
+      backImage: options.backImage ?? null,
     },
     person: { id: `person-${id}`, caseId: id, image: PERSON_IMAGE },
     stages: createInitialStages(),

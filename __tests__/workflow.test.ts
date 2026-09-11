@@ -428,3 +428,99 @@ describe('fixture selection for a declared document type', () => {
     expect(ocr.result.mrz?.present ?? false).toBe(false);
   }, 30_000);
 });
+
+describe('reverse-side capture', () => {
+  it('records the reverse against the document and survives a reload', async () => {
+    const user = await signIn();
+    const created = await useScreeningStore.getState().start(user);
+    await useScreeningStore.getState().setDocumentType('driving_license');
+    await useScreeningStore.getState().attachDocument(DOCUMENT_IMAGE);
+    await useScreeningStore
+      .getState()
+      .attachDocumentBack({ ...DOCUMENT_IMAGE, uri: 'file:///captures/back.jpg' });
+
+    // The reverse is a row of its own in `documents`, so the round trip is what
+    // proves it is actually stored rather than only held in memory.
+    const reloaded = await caseRepository.findById(created.id);
+    expect(reloaded?.document?.backImage?.uri).toBe('file:///captures/back.jpg');
+  }, 30_000);
+
+  it('discards a reverse when the front is retaken', async () => {
+    const user = await signIn();
+    await useScreeningStore.getState().start(user);
+    await useScreeningStore.getState().setDocumentType('driving_license');
+    await useScreeningStore.getState().attachDocument(DOCUMENT_IMAGE);
+    await useScreeningStore
+      .getState()
+      .attachDocumentBack({ ...DOCUMENT_IMAGE, uri: 'file:///captures/back.jpg' });
+
+    // The two images must be of the same document. Keeping an old reverse
+    // beside a new front would merge readings the officer never paired.
+    await useScreeningStore.getState().attachDocument(DOCUMENT_IMAGE);
+
+    expect(useScreeningStore.getState().activeCase?.document?.backImage).toBeNull();
+  }, 30_000);
+
+  it('screens without a reverse rather than demanding one', async () => {
+    const user = await signIn();
+    await runFullScreening(user, { documentType: 'driving_license' });
+
+    const state = useScreeningStore.getState();
+    expect(state.activeCase?.document?.backImage).toBeNull();
+    // A missing reverse must not block the workflow.
+    expect(state.activeCase?.result).not.toBeNull();
+    expect(state.phase).toBe('RESULT');
+  }, 30_000);
+});
+
+describe('reverse-side pairing safety', () => {
+  it('discards a reverse whose front was retaken while it was being stored', async () => {
+    const user = await signIn();
+    await useScreeningStore.getState().start(user);
+    await useScreeningStore.getState().setDocumentType('driving_license');
+    await useScreeningStore.getState().attachDocument(DOCUMENT_IMAGE);
+
+    // Persisting is asynchronous. Retake the front while the reverse is in
+    // flight: the two images are then of different captures, and pairing them
+    // would merge readings from documents the officer never put together.
+    const media = jest.requireMock('@/services/storage/mediaStore') as {
+      mediaStore: { persistCapture: jest.Mock };
+    };
+    media.mediaStore.persistCapture.mockImplementationOnce(async (_case, _kind, img) => {
+      await useScreeningStore
+        .getState()
+        .attachDocument({ ...DOCUMENT_IMAGE, uri: 'file:///captures/front-retaken.jpg' });
+      return img;
+    });
+
+    await useScreeningStore
+      .getState()
+      .attachDocumentBack({ ...DOCUMENT_IMAGE, uri: 'file:///captures/back.jpg' });
+
+    const document = useScreeningStore.getState().activeCase?.document;
+    expect(document?.image.uri).toBe('file:///captures/front-retaken.jpg');
+    expect(document?.backImage).toBeNull();
+  }, 30_000);
+
+  it('does not attach a reverse to a different case', async () => {
+    const user = await signIn();
+    await useScreeningStore.getState().start(user);
+    await useScreeningStore.getState().setDocumentType('driving_license');
+    await useScreeningStore.getState().attachDocument(DOCUMENT_IMAGE);
+
+    const media = jest.requireMock('@/services/storage/mediaStore') as {
+      mediaStore: { persistCapture: jest.Mock };
+    };
+    media.mediaStore.persistCapture.mockImplementationOnce(async (_case, _kind, img) => {
+      // The officer abandons this case and opens another mid-capture.
+      await useScreeningStore.getState().start(user);
+      return img;
+    });
+
+    await useScreeningStore
+      .getState()
+      .attachDocumentBack({ ...DOCUMENT_IMAGE, uri: 'file:///captures/back.jpg' });
+
+    expect(useScreeningStore.getState().activeCase?.document).toBeNull();
+  }, 30_000);
+});

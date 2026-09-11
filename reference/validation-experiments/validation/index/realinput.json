@@ -1,0 +1,885 @@
+{
+  "document_type": "national_id",
+  "mrz_processed": false,
+  "orientation_angle_detected": "0",
+  "orientation_confidence": 0.9240999817848206,
+  "orientation_corrected": false,
+  "detected": true,
+  "detection_confidence": null,
+  "detection_box": [
+    0,
+    0,
+    1336,
+    838
+  ],
+  "detection_quad": null,
+  "correction_mode": "skipped_assume_precropped",
+  "mrz_lines": [],
+  "mrz_line_details": [],
+  "field_lines": [
+    {
+      "text": "ஆதu அரசாகமb",
+      "lang": "ta",
+      "confidence": 0.7822557687759399,
+      "bbox": [
+        441,
+        25,
+        649,
+        56
+      ]
+    },
+    {
+      "text": "Government of India",
+      "lang": "ta",
+      "confidence": 0.9968866109848022,
+      "bbox": [
+        348,
+        69,
+        741,
+        114
+      ]
+    },
+    {
+      "text": "ஆதார்",
+      "lang": "ta",
+      "confidence": 0.9911358952522278,
+      "bbox": [
+        1139,
+        74,
+        1229,
+        111
+      ]
+    },
+    {
+      "text": "StOzizo/ot :penss! 'ou jeehpey",
+      "lang": "ta",
+      "confidence": 0.6415679454803467,
+      "bbox": [
+        68,
+        152,
+        117,
+        566
+      ]
+    },
+    {
+      "text": "நேரந்திரன்",
+      "lang": "ta",
+      "confidence": 0.9780511856079102,
+      "bbox": [
+        442,
+        161,
+        629,
+        218
+      ]
+    },
+    {
+      "text": "ரா",
+      "lang": "ta",
+      "confidence": 0.9998969435691833,
+      "bbox": [
+        625,
+        177,
+        671,
+        210
+      ]
+    },
+    {
+      "text": "Narendran",
+      "lang": "ta",
+      "confidence": 0.9998406171798706,
+      "bbox": [
+        445,
+        208,
+        619,
+        246
+      ]
+    },
+    {
+      "text": "R",
+      "lang": "fr",
+      "confidence": 0.9999070167541504,
+      "bbox": [
+        622,
+        213,
+        653,
+        246
+      ]
+    },
+    {
+      "text": "பிறந்த",
+      "lang": "ta",
+      "confidence": 0.9877631068229675,
+      "bbox": [
+        439,
+        242,
+        557,
+        303
+      ]
+    },
+    {
+      "text": "நாள்/DOB: 03/01/2007",
+      "lang": "ta",
+      "confidence": 0.9624369740486145,
+      "bbox": [
+        553,
+        245,
+        919,
+        296
+      ]
+    },
+    {
+      "text": "2",
+      "lang": "ta",
+      "confidence": 0.4651243984699249,
+      "bbox": [
+        446,
+        300,
+        497,
+        334
+      ]
+    },
+    {
+      "text": "ண்/",
+      "lang": "ta",
+      "confidence": 0.8697143197059631,
+      "bbox": [
+        484,
+        289,
+        551,
+        333
+      ]
+    },
+    {
+      "text": "MALE",
+      "lang": "ta",
+      "confidence": 0.9999009370803833,
+      "bbox": [
+        553,
+        292,
+        656,
+        327
+      ]
+    },
+    {
+      "text": "ஆதார்",
+      "lang": "ta",
+      "confidence": 0.9965513348579407,
+      "bbox": [
+        473,
+        373,
+        561,
+        410
+      ]
+    },
+    {
+      "text": "என்பது",
+      "lang": "ta",
+      "confidence": 0.9997928738594055,
+      "bbox": [
+        573,
+        372,
+        671,
+        410
+      ]
+    },
+    {
+      "text": "அடையாளத்திற்.",
+      "lang": "ta",
+      "confidence": 0.9683305025100708,
+      "bbox": [
+        685,
+        378,
+        892,
+        409
+      ]
+    },
+    {
+      "text": "காa",
+      "lang": "ta",
+      "confidence": 0.7644665241241455,
+      "bbox": [
+        883,
+        381,
+        951,
+        406
+      ]
+    },
+    {
+      "text": "சான்றாகும்,",
+      "lang": "ta",
+      "confidence": 0.973192572593689,
+      "bbox": [
+        964,
+        379,
+        1118,
+        410
+      ]
+    },
+    {
+      "text": "குடியுரிமை,",
+      "lang": "ta",
+      "confidence": 0.9840863943099976,
+      "bbox": [
+        1133,
+        380,
+        1281,
+        411
+      ]
+    },
+    {
+      "text": "அல்லது",
+      "lang": "ta",
+      "confidence": 0.8931121826171875,
+      "bbox": [
+        471,
+        400,
+        583,
+        439
+      ]
+    },
+    {
+      "text": "பிறந்த",
+      "lang": "ta",
+      "confidence": 0.9959642291069031,
+      "bbox": [
+        600,
+        401,
+        692,
+        442
+      ]
+    },
+    {
+      "text": "தேதிக்காள்",
+      "lang": "ta",
+      "confidence": 0.9057402610778809,
+      "bbox": [
+        712,
+        404,
+        862,
+        439
+      ]
+    },
+    {
+      "text": "சான்றல்ல.",
+      "lang": "ta",
+      "confidence": 0.99766606092453,
+      "bbox": [
+        878,
+        404,
+        1025,
+        441
+      ]
+    },
+    {
+      "text": "8gi",
+      "lang": "fr",
+      "confidence": 0.5893548130989075,
+      "bbox": [
+        1044,
+        407,
+        1100,
+        443
+      ]
+    },
+    {
+      "text": "சரிபார்ப்புடன்",
+      "lang": "ta",
+      "confidence": 0.9870173335075378,
+      "bbox": [
+        1119,
+        408,
+        1282,
+        439
+      ]
+    },
+    {
+      "text": "மட்டுமே",
+      "lang": "ta",
+      "confidence": 0.9990452527999878,
+      "bbox": [
+        468,
+        430,
+        582,
+        469
+      ]
+    },
+    {
+      "text": "பயன்படுத்தப்பட",
+      "lang": "ta",
+      "confidence": 0.969403862953186,
+      "bbox": [
+        604,
+        434,
+        802,
+        469
+      ]
+    },
+    {
+      "text": "வேண்டும்",
+      "lang": "ta",
+      "confidence": 0.9651780724525452,
+      "bbox": [
+        826,
+        432,
+        954,
+        471
+      ]
+    },
+    {
+      "text": "(",
+      "lang": "fr",
+      "confidence": 0.7528884410858154,
+      "bbox": [
+        976,
+        438,
+        1025,
+        470
+      ]
+    },
+    {
+      "text": "பன்லைன்",
+      "lang": "ta",
+      "confidence": 0.9007467031478882,
+      "bbox": [
+        1010,
+        435,
+        1123,
+        470
+      ]
+    },
+    {
+      "text": "அங்ககாரம்",
+      "lang": "ta",
+      "confidence": 0.8721730709075928,
+      "bbox": [
+        1146,
+        439,
+        1281,
+        467
+      ]
+    },
+    {
+      "text": "அல்லது",
+      "lang": "ta",
+      "confidence": 0.9990171790122986,
+      "bbox": [
+        468,
+        458,
+        577,
+        499
+      ]
+    },
+    {
+      "text": "QR",
+      "lang": "fr",
+      "confidence": 0.9926071166992188,
+      "bbox": [
+        578,
+        467,
+        611,
+        494
+      ]
+    },
+    {
+      "text": "குறியீட்",
+      "lang": "ta",
+      "confidence": 0.9956244826316833,
+      "bbox": [
+        611,
+        459,
+        709,
+        500
+      ]
+    },
+    {
+      "text": "டை",
+      "lang": "ta",
+      "confidence": 0.9513448476791382,
+      "bbox": [
+        702,
+        465,
+        752,
+        493
+      ]
+    },
+    {
+      "text": "ஸ்கேன்",
+      "lang": "ta",
+      "confidence": 0.9790592789649963,
+      "bbox": [
+        754,
+        461,
+        858,
+        496
+      ]
+    },
+    {
+      "text": "செய்தல்ஆ.ப்லைன்",
+      "lang": "ta",
+      "confidence": 0.9343551397323608,
+      "bbox": [
+        855,
+        460,
+        1109,
+        501
+      ]
+    },
+    {
+      "text": "XML)",
+      "lang": "fr",
+      "confidence": 0.9970152974128723,
+      "bbox": [
+        1104,
+        466,
+        1158,
+        496
+      ]
+    },
+    {
+      "text": "Aadhaar",
+      "lang": "ta",
+      "confidence": 0.9999403953552246,
+      "bbox": [
+        458,
+        495,
+        591,
+        533
+      ]
+    },
+    {
+      "text": "is",
+      "lang": "ta",
+      "confidence": 0.999657154083252,
+      "bbox": [
+        588,
+        500,
+        618,
+        533
+      ]
+    },
+    {
+      "text": "proof",
+      "lang": "fr",
+      "confidence": 0.9999510049819946,
+      "bbox": [
+        616,
+        494,
+        708,
+        539
+      ]
+    },
+    {
+      "text": "of",
+      "lang": "ta",
+      "confidence": 0.9999932646751404,
+      "bbox": [
+        707,
+        499,
+        746,
+        533
+      ]
+    },
+    {
+      "text": "identity,",
+      "lang": "fr",
+      "confidence": 0.9998795390129089,
+      "bbox": [
+        744,
+        496,
+        870,
+        540
+      ]
+    },
+    {
+      "text": "not",
+      "lang": "fr",
+      "confidence": 0.9999902248382568,
+      "bbox": [
+        872,
+        503,
+        928,
+        534
+      ]
+    },
+    {
+      "text": "of",
+      "lang": "ta",
+      "confidence": 0.999992847442627,
+      "bbox": [
+        930,
+        501,
+        966,
+        532
+      ]
+    },
+    {
+      "text": "citizenship",
+      "lang": "fr",
+      "confidence": 0.999860405921936,
+      "bbox": [
+        966,
+        497,
+        1126,
+        540
+      ]
+    },
+    {
+      "text": "or",
+      "lang": "ta",
+      "confidence": 0.9999392032623291,
+      "bbox": [
+        457,
+        541,
+        497,
+        569
+      ]
+    },
+    {
+      "text": "date",
+      "lang": "fr",
+      "confidence": 0.99998539686203,
+      "bbox": [
+        497,
+        537,
+        571,
+        570
+      ]
+    },
+    {
+      "text": "of",
+      "lang": "ta",
+      "confidence": 0.9999843835830688,
+      "bbox": [
+        572,
+        539,
+        608,
+        569
+      ]
+    },
+    {
+      "text": "birth.",
+      "lang": "fr",
+      "confidence": 0.9991852641105652,
+      "bbox": [
+        606,
+        538,
+        690,
+        571
+      ]
+    },
+    {
+      "text": "It",
+      "lang": "ta",
+      "confidence": 0.9994785189628601,
+      "bbox": [
+        696,
+        541,
+        723,
+        570
+      ]
+    },
+    {
+      "text": "should",
+      "lang": "ta",
+      "confidence": 0.9999825954437256,
+      "bbox": [
+        722,
+        538,
+        826,
+        573
+      ]
+    },
+    {
+      "text": "be",
+      "lang": "fr",
+      "confidence": 0.9999537467956543,
+      "bbox": [
+        825,
+        539,
+        869,
+        573
+      ]
+    },
+    {
+      "text": "used",
+      "lang": "ta",
+      "confidence": 0.9999852180480957,
+      "bbox": [
+        869,
+        539,
+        944,
+        572
+      ]
+    },
+    {
+      "text": "with",
+      "lang": "fr",
+      "confidence": 0.9999532699584961,
+      "bbox": [
+        943,
+        539,
+        1014,
+        573
+      ]
+    },
+    {
+      "text": "verification",
+      "lang": "fr",
+      "confidence": 0.9991095662117004,
+      "bbox": [
+        1015,
+        539,
+        1180,
+        576
+      ]
+    },
+    {
+      "text": "(online",
+      "lang": "fr",
+      "confidence": 0.9994907379150391,
+      "bbox": [
+        1183,
+        542,
+        1287,
+        578
+      ]
+    },
+    {
+      "text": "authentication,",
+      "lang": "fr",
+      "confidence": 0.9998781085014343,
+      "bbox": [
+        456,
+        574,
+        678,
+        615
+      ]
+    },
+    {
+      "text": "scanning",
+      "lang": "fr",
+      "confidence": 0.9998636245727539,
+      "bbox": [
+        715,
+        575,
+        851,
+        618
+      ]
+    },
+    {
+      "text": "of",
+      "lang": "ta",
+      "confidence": 0.9999099373817444,
+      "bbox": [
+        848,
+        574,
+        891,
+        617
+      ]
+    },
+    {
+      "text": "or",
+      "lang": "ta",
+      "confidence": 0.9999542832374573,
+      "bbox": [
+        682,
+        584,
+        720,
+        612
+      ]
+    },
+    {
+      "text": "QR",
+      "lang": "fr",
+      "confidence": 0.999929666519165,
+      "bbox": [
+        888,
+        578,
+        937,
+        614
+      ]
+    },
+    {
+      "text": "code",
+      "lang": "ta",
+      "confidence": 0.9999523162841797,
+      "bbox": [
+        936,
+        578,
+        1015,
+        615
+      ]
+    },
+    {
+      "text": "–",
+      "lang": "ta",
+      "confidence": 0.7985131144523621,
+      "bbox": [
+        1016,
+        581,
+        1036,
+        611
+      ]
+    },
+    {
+      "text": "offline",
+      "lang": "ta",
+      "confidence": 0.9982038736343384,
+      "bbox": [
+        1034,
+        578,
+        1133,
+        614
+      ]
+    },
+    {
+      "text": "XML).",
+      "lang": "ta",
+      "confidence": 0.9989660978317261,
+      "bbox": [
+        1130,
+        579,
+        1223,
+        619
+      ]
+    },
+    {
+      "text": "3671",
+      "lang": "fr",
+      "confidence": 0.9999974966049194,
+      "bbox": [
+        417,
+        705,
+        560,
+        756
+      ]
+    },
+    {
+      "text": "8891 3257",
+      "lang": "fr",
+      "confidence": 0.9999012351036072,
+      "bbox": [
+        560,
+        700,
+        859,
+        758
+      ]
+    },
+    {
+      "text": "எனது",
+      "lang": "ta",
+      "confidence": 0.9952874779701233,
+      "bbox": [
+        26,
+        786,
+        237,
+        827
+      ]
+    },
+    {
+      "text": "ஆதார்.",
+      "lang": "ta",
+      "confidence": 0.9298362731933594,
+      "bbox": [
+        276,
+        774,
+        524,
+        831
+      ]
+    },
+    {
+      "text": "எனது",
+      "lang": "ta",
+      "confidence": 0.9996771216392517,
+      "bbox": [
+        561,
+        782,
+        766,
+        827
+      ]
+    },
+    {
+      "text": "அடயாளடம்",
+      "lang": "ta",
+      "confidence": 0.9436755180358887,
+      "bbox": [
+        807,
+        779,
+        1259,
+        820
+      ]
+    }
+  ],
+  "field_full_text": "ஆதu அரசாகமb Government of India ஆதார் StOzizo/ot :penss! 'ou jeehpey நேரந்திரன் ரா Narendran R பிறந்த நாள்/DOB: 03/01/2007 2 ண்/ MALE ஆதார் என்பது அடையாளத்திற். காa சான்றாகும், குடியுரிமை, அல்லது பிறந்த தேதிக்காள் சான்றல்ல. 8gi சரிபார்ப்புடன் மட்டுமே பயன்படுத்தப்பட வேண்டும் ( பன்லைன் அங்ககாரம் அல்லது QR குறியீட் டை ஸ்கேன் செய்தல்ஆ.ப்லைன் XML) Aadhaar is proof of identity, not of citizenship or date of birth. It should be used with verification (online authentication, scanning of or QR code – offline XML). 3671 8891 3257 எனது ஆதார். எனது அடயாளடம்",
+  "detected_lang_family": "ta",
+  "language_resolution_method": "header_india_script_race",
+  "language_confidence": 0.9477997227675385,
+  "language_resolution_debug": {
+    "country": "IND",
+    "header_text_sample": "8au agemdsi Government of India agmj",
+    "candidates": [
+      [
+        "hi",
+        0.725
+      ],
+      [
+        "ta",
+        0.948
+      ]
+    ]
+  },
+  "secondary_lang_used": "fr",
+  "structured_fields": {
+    "name": "Narendran R",
+    "name_native": "நேரந்திரன் ரா",
+    "father_name": null,
+    "date_of_birth": "2007-01-03",
+    "sex": "M",
+    "document_number": "3671 8891 3257",
+    "nationality": "INDIAN",
+    "issue_date": null,
+    "expiry_date": null
+  },
+  "structured_fields_sources": {
+    "name": "positional_above_dob",
+    "name_native": "positional_above_dob",
+    "father_name": "not_found",
+    "date_of_birth": "label_same_line",
+    "sex": "standalone_sex",
+    "document_number": "standalone_id",
+    "nationality": "header_country",
+    "issue_date": "not_found",
+    "expiry_date": "not_found"
+  },
+  "machine_code_result": {
+    "side": "front",
+    "qr_code": true,
+    "bar_code": false,
+    "qr_crop": "D:\\SIH Project\\qr_barcode_output\\testadhar_1788888431\\front\\qr_barcode\\qr_1.png",
+    "barcode_crop": null,
+    "qr_crops": [
+      "D:\\SIH Project\\qr_barcode_output\\testadhar_1788888431\\front\\qr_barcode\\qr_1.png"
+    ],
+    "barcode_crops": [],
+    "detections": [
+      {
+        "code_type": "qr",
+        "format": "QRCode",
+        "crop_path": "D:\\SIH Project\\qr_barcode_output\\testadhar_1788888431\\front\\qr_barcode\\qr_1.png",
+        "detection_method": "opencv_enhanced"
+      }
+    ],
+    "detection_ms": 18408.1
+  },
+  "timings_ms": {
+    "orientation_ms": 39.258699980564415,
+    "detection_ms": 0,
+    "correction_ms": 0,
+    "mrz_ocr_ms": 52274.883799953386,
+    "field_ocr_ms": 21585.630199988373,
+    "structured_extraction_ms": 10.347999981604517,
+    "qr_barcode_ms": 18408.140999963507,
+    "total_ms": 73922.24179999903
+  },
+  "message": null
+}

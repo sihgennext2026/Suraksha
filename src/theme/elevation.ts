@@ -25,15 +25,18 @@ export function elevation(level: ElevationLevel, scheme: ColorScheme): ViewStyle
     }) as ViewStyle;
   }
 
-  const opacityByLevel = { low: 0.05, medium: 0.08, high: 0.12 } as const;
-  const radiusByLevel = { low: 3, medium: 8, high: 18 } as const;
+  // Light UI: the shadow is what separates a card from the ground, since the
+  // borders are deliberately close in tone. Wide and faint reads as depth; tight
+  // and dark reads as a drop-shadow effect.
+  const opacityByLevel = { low: 0.04, medium: 0.07, high: 0.10 } as const;
+  const radiusByLevel = { low: 6, medium: 16, high: 32 } as const;
   return Platform.select<ViewStyle>({
-    android: { elevation: level === 'low' ? 1 : level === 'medium' ? 3 : 6 },
+    android: { elevation: level === 'low' ? 1 : level === 'medium' ? 4 : 8 },
     default: {
-      shadowColor: '#0F1923',
+      shadowColor: '#101828',
       shadowOpacity: opacityByLevel[level],
       shadowRadius: radiusByLevel[level],
-      shadowOffset: { width: 0, height: level === 'low' ? 1 : level === 'medium' ? 3 : 6 },
+      shadowOffset: { width: 0, height: level === 'low' ? 1 : level === 'medium' ? 6 : 12 },
     },
   }) as ViewStyle;
 }

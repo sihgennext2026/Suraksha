@@ -1,0 +1,11 @@
+{
+  "document_type": "passport",
+  "fields": {
+    "name": "ARUN KUMAR",
+    "passport_number": "Z1234567",
+    "nationality": "INDIAN",
+    "date_of_birth": "1990-08-15",
+    "date_of_issue": "2020-01-01",
+    "date_of_expiry": "2030-12-31"
+  }
+}

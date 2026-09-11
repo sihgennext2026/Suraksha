@@ -37,11 +37,67 @@ def _clean(value: Any) -> Any:
 
 
 class FieldSource(str, Enum):
+    """How a value was recovered from the image."""
+
     MRZ = "mrz"
     LABEL_SAME_LINE = "label_same_line"
     LABEL_NEXT_LINE = "label_next_line"
     STANDALONE_ID = "standalone_id"
+    QR = "qr"
+    BARCODE = "barcode"
     NOT_FOUND = "not_found"
+
+
+class DocumentSide(str, Enum):
+    FRONT = "front"
+    BACK = "back"
+
+
+class FieldOrigin(str, Enum):
+    """
+    Where a value came from, kept separate from how it was read.
+
+    An officer resolving a disagreement needs to know which capture a value came
+    off, and a machine-readable code is a different kind of authority from text
+    recognised off a printed page — a QR payload is usually signed, a label match
+    is a heuristic over OCR output.
+    """
+
+    FRONT = "front"
+    BACK = "back"
+    MRZ = "mrz"
+    QR = "qr"
+
+
+class FieldAgreement(str, Enum):
+    """
+    Whether the sources that supplied a field said the same thing.
+
+    CONFLICT is never a fraud finding on its own. Two captures of the same
+    document disagree for ordinary reasons — glare on one side, a truncated
+    label, an OCR substitution — and the officer has the document in hand to
+    settle it. It resolves to REVIEW, never FAIL.
+    """
+
+    SINGLE_SOURCE = "SINGLE_SOURCE"
+    AGREED = "AGREED"
+    CONFLICT = "CONFLICT"
+
+
+@dataclass
+class FieldReading:
+    """
+    One source's reading of a field.
+
+    Retained for every source once more than one supplied a value, so a
+    disagreement can be shown as the two readings it actually is rather than as
+    a winner and a hidden loser.
+    """
+
+    origin: FieldOrigin
+    value: Optional[str]
+    source: FieldSource = FieldSource.NOT_FOUND
+    confidence: Optional[float] = None
 
 
 @dataclass
@@ -52,6 +108,13 @@ class OcrField:
     source: FieldSource = FieldSource.NOT_FOUND
     confidence: Optional[float] = None
     region: Optional[BBox] = None
+    #: Which capture or code the accepted value came off.
+    origin: FieldOrigin = FieldOrigin.FRONT
+    #: Whether the sources that supplied this field agreed.
+    agreement: FieldAgreement = FieldAgreement.SINGLE_SOURCE
+    #: Every source's reading. Populated only when more than one supplied a
+    #: value, so a single-sided document carries no redundant echo of itself.
+    readings: List[FieldReading] = field(default_factory=list)
 
 
 @dataclass
@@ -83,14 +146,58 @@ class DetectionPayload:
     orientation_corrected: bool = False
 
 
+class MachineCodeType(str, Enum):
+    QR = "qr"
+    BARCODE = "barcode"
+
+
+@dataclass
+class MachineCode:
+    """
+    A machine-readable code found on one side of the document.
+
+    `decoded` is None when a code was located but its payload could not be read.
+    That is an absence, not a finding: an unreadable code says nothing about
+    whether the document is genuine.
+    """
+
+    side: DocumentSide
+    code_type: MachineCodeType
+    format: Optional[str] = None
+    decoded: Optional[str] = None
+    detection_method: Optional[str] = None
+
+
+@dataclass
+class SideEvidence:
+    """
+    What one capture produced.
+
+    Present for every side the officer actually captured. A side that was not
+    captured is absent from the list rather than recorded as an empty result,
+    so "no back capture" and "a back capture that read nothing" stay distinct.
+    """
+
+    side: DocumentSide
+    detection: DetectionPayload
+    language: Optional[str] = None
+    #: Field keys this side supplied a value for. The values themselves live in
+    #: the merged field list, which is the single place a consumer reads them.
+    field_keys: List[str] = field(default_factory=list)
+
+
 @dataclass
 class OcrResult:
     document_type: DocumentType
     fields: List[OcrField]
     mrz: MrzPayload
+    #: The front capture's detection. Kept at the top level because it is what
+    #: the pipeline display has always reported; per-side detail is in `sides`.
     detection: DetectionPayload
     overall_confidence: Optional[float] = None
     language: Optional[str] = None
+    sides: List[SideEvidence] = field(default_factory=list)
+    machine_codes: List[MachineCode] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         return _clean(self)

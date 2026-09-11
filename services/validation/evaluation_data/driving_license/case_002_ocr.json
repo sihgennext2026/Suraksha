@@ -1,0 +1,26 @@
+{
+  "detected": true,
+  "detection_confidence": 0.91,
+  "detection_box": [100, 200, 900, 1100],
+  "correction_mode": "cv_contour_warp",
+  "lines": [
+    {"text": "Indian Union Driving Licence", "confidence": 0.98},
+    {"text": "Issued by Government Of Karnataka", "confidence": 0.96},
+    {"text": "KA", "confidence": 0.99},
+    {"text": "KA1420190012345", "confidence": 0.99},
+    {"text": "Issue Date", "confidence": 0.97},
+    {"text": "Validity (NT)", "confidence": 0.96},
+    {"text": "12-03-2019", "confidence": 0.98},
+    {"text": "11-03-2039", "confidence": 0.98},
+    {"text": "Name:", "confidence": 0.97},
+    {"text": "PRIYA SHARMA", "confidence": 0.95},
+    {"text": "DateofBirth:20-05-1998", "confidence": 0.94},
+    {"text": "Blood Group: O+", "confidence": 0.90},
+    {"text": "Address:", "confidence": 0.97},
+    {"text": "42 MG ROAD BANGALORE KA 560001", "confidence": 0.96}
+  ],
+  "full_text": "Indian Union Driving Licence Issued by Government Of Karnataka KA KA1420190012345 Issue Date Validity (NT) 12-03-2019 11-03-2039 Name: PRIYA SHARMA DateofBirth:20-05-1998 Blood Group: O+ Address: 42 MG ROAD BANGALORE KA 560001",
+  "average_confidence": 0.96,
+  "timings_ms": {"detection_ms": 300, "correction_ms": 20, "ocr_ms": 1500, "total_ms": 1820},
+  "message": null
+}

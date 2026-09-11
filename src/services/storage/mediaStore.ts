@@ -15,11 +15,14 @@ const log = createLogger('media-store');
  * keyed by the device keystore, and purged on the retention schedule set by the
  * unit's data policy.
  */
+/** Which capture a file holds. One file per kind per case. */
+export type CaptureKind = 'document' | 'document_back' | 'person';
+
 export interface MediaStore {
   /** Moves a freshly captured image out of the cache into durable storage. */
   persistCapture(
     caseId: string,
-    kind: 'document' | 'person',
+    kind: CaptureKind,
     image: CapturedImage,
   ): Promise<CapturedImage>;
   /** Removes every image held for a case. Safe to call when none exist. */
@@ -45,7 +48,7 @@ function ensureDirectory(directory: Directory): void {
 class FileSystemMediaStore implements MediaStore {
   async persistCapture(
     caseId: string,
-    kind: 'document' | 'person',
+    kind: CaptureKind,
     image: CapturedImage,
   ): Promise<CapturedImage> {
     try {

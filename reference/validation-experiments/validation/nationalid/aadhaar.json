@@ -1,0 +1,19 @@
+{
+    "document_type": "aadhaar",
+    "aadhaar": {
+        "aadhaar_number": null,
+        "name": null,
+        "name_native": null,
+        "date_of_birth": null,
+        "gender": null,
+        "address": null,
+        "pincode": null,
+        "qr_data": null,
+        "image": {
+            "filename": "aadhar.jpeg",
+            "width": 557,
+            "height": 548,
+            "format": "JPEG"
+        }
+    }
+}

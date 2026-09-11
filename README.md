@@ -8,9 +8,43 @@ the device, review the evidence, and record an operational decision. It is built
 network at all — connectivity only determines _when_ a completed case leaves the device, never
 whether a screening can be performed.
 
-This build is **frontend-first**. There is no backend and no real inference yet. Every model is
-stood in for by a deterministic mock behind the same typed interface the production implementation
-will satisfy, so replacing them is a change to one registry function rather than a rewrite.
+Extraction, rule validation and face verification run **real models** through the screening service
+in [`services/screening-api`](services/screening-api). Tamper detection (DINOv2) and anomaly
+detection (PatchCore) do not exist and are reported `NOT_AVAILABLE` on every case — never mocked
+into the real path, because an invented tamper finding is indistinguishable, to an officer, from a
+real one.
+
+With no screening service configured the app replays a generated case document instead, and says so
+per module in **Settings → Integration status**. The choice is made in one place,
+[`src/services/ai/registry.ts`](src/services/ai/registry.ts).
+
+---
+
+## Repository layout
+
+```
+app/                        Expo Router routes
+src/                        application code — UI, stores, database, service clients
+__tests__/                  Jest suites
+contracts/                  the canonical case document: JSON Schema, thresholds,
+                            Python package and TypeScript mirror
+services/
+  screening-api/            the service the app calls; sequences the modules below
+                            and assembles the case document
+  extraction/               document detection, perspective correction, PP-OCRv5, MRZ/QR
+  validation/               deterministic rule sets per document type
+  face-verification/        SCRFD detection, five-point alignment, ArcFace R50
+reference/                  earlier experiments, kept for provenance and not loaded
+  extraction-experiments/   an earlier extraction service
+  validation-experiments/   per-document-type validation scripts
+  risk-prototype/           the prototype the fusion weights were derived from
+plugins/                    Expo config plugins (release signing, cleartext policy)
+scripts/                    build-apk.ps1
+```
+
+Nothing under `reference/` is imported by the running system. The screening service loads exactly
+three of the directories above, and `services/screening-api/ssb_screening_api/loader.py` is the
+whole of the coupling between them.
 
 ---
 
@@ -26,6 +60,27 @@ Reanimated 4 · Gesture Handler · FlashList 2.
 npm install
 npm start          # then press "a" for Android, "i" for iOS, or scan the QR code
 ```
+
+Expo Go only ever supports the newest SDK, so it cannot open this SDK 54 project — that mismatch is
+the "something went wrong" it reports. Either install the matching Expo Go build for SDK 54, or use
+a standalone APK, which needs no dev server at all:
+
+```powershell
+npm run build:apk        # -> dist/SSB-Suraksha-release.apk
+```
+
+To screen with real models rather than a replayed document, start the screening service and give the
+app its address:
+
+```powershell
+cd services/screening-api
+pip install -r requirements.txt
+powershell -ExecutionPolicy Bypass -File run.ps1
+```
+
+It prints the addresses the phone can reach; enter one under **Settings → Screening service**. See
+[`services/screening-api/README.md`](services/screening-api/README.md) for what runs and what does
+not.
 
 The screening flow needs a camera. On a simulator, use the **import an image** control on the
 document capture screen; the subject capture step requires a real device or a simulated camera.

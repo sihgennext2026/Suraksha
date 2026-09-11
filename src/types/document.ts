@@ -14,6 +14,16 @@ export interface DocumentTypeDescriptor {
   hint: string;
   /** Whether this document carries a machine-readable zone. */
   hasMrz: boolean;
+  /**
+   * Whether this type prints fields on its reverse that extraction can read.
+   *
+   * Decides only whether the officer is prompted for a second capture. What the
+   * reverse is expected to carry, and how two sides are reconciled, is the merge
+   * policy's business and lives in
+   * `contracts/python/ssb_contracts/services/field_merge.py`. A wrong value here
+   * costs a prompt, never a finding.
+   */
+  hasBackFields: boolean;
   /** Capture guide aspect ratio (width / height). */
   captureAspectRatio: number;
   /**
@@ -50,6 +60,14 @@ export interface DocumentRecord {
   /** The type the officer declared. Nothing infers it. */
   declaredType: DocumentType;
   image: CapturedImage;
+  /**
+   * The reverse side, where the officer captured one.
+   *
+   * Null is an ordinary outcome, not an omission: a passport's reverse carries
+   * nothing this pipeline reads, and an officer at a counter may not get a
+   * second shot. A screening runs either way.
+   */
+  backImage: CapturedImage | null;
 }
 
 export interface PersonCaptureRecord {

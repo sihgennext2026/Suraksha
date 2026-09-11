@@ -1,0 +1,64 @@
+{
+  "document_type": "passport",
+  "input_file": "C:\\Users\\91994\\OneDrive\\Desktop\\response_1787826901623.json",
+  "evaluation": {
+    "total_cases": 1,
+    "passed_cases": 0,
+    "failed_cases": 1,
+    "review_cases": 0,
+    "score": 0.0,
+    "score_percent": 0.0,
+    "overall_status": "FAIL"
+  },
+  "failed_cases": [
+    {
+      "case_id": "case_001",
+      "case_score": 0.0,
+      "failed_fields": [
+        {
+          "field": "name",
+          "expected": "ARUN KUMAR",
+          "extracted": null,
+          "status": "REVIEW",
+          "reason": "name could not be extracted from OCR"
+        },
+        {
+          "field": "passport_number",
+          "expected": "Z1234567",
+          "extracted": "TN628151",
+          "status": "FAIL",
+          "reason": "Extracted passport_number does not match expected passport_number"
+        },
+        {
+          "field": "nationality",
+          "expected": "INDIAN",
+          "extracted": null,
+          "status": "REVIEW",
+          "reason": "nationality could not be extracted from OCR"
+        },
+        {
+          "field": "date_of_birth",
+          "expected": "1990-08-15",
+          "extracted": "2006-03-10",
+          "status": "FAIL",
+          "reason": "Extracted date '2006-03-10' does not match expected '1990-08-15'"
+        },
+        {
+          "field": "date_of_issue",
+          "expected": "2020-01-01",
+          "extracted": null,
+          "status": "REVIEW",
+          "reason": "date_of_issue could not be extracted from OCR"
+        },
+        {
+          "field": "date_of_expiry",
+          "expected": "2030-12-31",
+          "extracted": null,
+          "status": "REVIEW",
+          "reason": "date_of_expiry could not be extracted from OCR"
+        }
+      ]
+    }
+  ],
+  "review_cases": []
+}

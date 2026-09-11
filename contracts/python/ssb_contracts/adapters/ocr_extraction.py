@@ -20,6 +20,7 @@ null here, meaning "not evaluated at this stage", which is distinct from false.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from ..core import Envelope, Module, ModuleError, failed, not_available, partial, success
@@ -31,13 +32,73 @@ from ..document_types import (
 )
 from ..modules import (
     DetectionPayload,
+    DocumentSide,
+    FieldOrigin,
+    FieldReading,
     FieldSource,
+    MachineCode,
+    MachineCodeType,
     MrzPayload,
     OcrField,
     OcrResult,
+    SideEvidence,
+    ValidationCheck,
 )
+from ..services.field_merge import merge_fields
 
 OCR_MODEL_VERSION = "phase1-ppocrv5-unet-1.0.0"
+
+
+@dataclass
+class ExtractionOutcome:
+    """
+    The extraction envelope plus what merging the two captures revealed.
+
+    The checks travel beside the envelope rather than inside it because they are
+    not extraction findings: they are statements about whether two readings of
+    one document agree, which belongs with the rule results the officer reads.
+    """
+
+    envelope: Envelope
+    checks: List[ValidationCheck]
+    fields: List[OcrField]
+
+
+def _machine_codes(body: Dict[str, Any], side: DocumentSide) -> List[MachineCode]:
+    """Reads the extraction service's machine_code_result block."""
+    block = body.get("machine_code_result") or {}
+    codes: List[MachineCode] = []
+    for detection in block.get("detections") or []:
+        raw_type = (detection.get("code_type") or "").lower()
+        if raw_type not in ("qr", "barcode"):
+            continue
+        codes.append(
+            MachineCode(
+                side=side,
+                code_type=MachineCodeType(raw_type),
+                format=detection.get("format"),
+                # The extraction service locates and crops codes; it does not
+                # decode their payload. None here means "present, not read",
+                # which the merge reports as inconclusive rather than as a fault.
+                decoded=detection.get("decoded"),
+                detection_method=detection.get("detection_method"),
+            )
+        )
+    return codes
+
+
+def _fields_from_code(code: MachineCode) -> Dict[str, Optional[str]]:
+    """
+    Fields a decoded machine-readable payload asserts.
+
+    Nothing is parsed here yet: the extraction service returns crops rather than
+    payloads, so there is never a decoded string to read. The seam exists so a
+    decoder can be added in one place, and returns nothing rather than inventing
+    a value from a code it cannot read.
+    """
+    if not code.decoded:
+        return {}
+    return {}
 
 _SOURCE_MAP = {
     "mrz": FieldSource.MRZ,
@@ -86,18 +147,35 @@ def from_extract_response(
     document_type: DocumentType,
     response: Dict[str, Any],
     *,
+    back: Optional[Dict[str, Any]] = None,
     image_size: Optional[Tuple[int, int]] = None,
     model_version: str = OCR_MODEL_VERSION,
-) -> Envelope:
-    """`response` is the JSON body of the extraction service's `POST /extract`."""
+) -> "ExtractionOutcome":
+    """
+    Builds the canonical extraction envelope from one or both captures.
+
+    `response` is the body of `POST /extract`; `back`, when given, is the body
+    of `POST /extract-back`. With no back capture the result is exactly what it
+    was before two sides existed — every field SINGLE_SOURCE from the front —
+    so a single-sided screening is unchanged by this path.
+
+    The merge's own findings come back alongside the envelope rather than inside
+    it. Cross-source agreement is a property of assembling one document from two
+    captures, which only the assembler can see: the validation service is handed
+    a field set and never learns there were two sides.
+    """
     supported, reason = supports(Module.OCR, document_type)
     if not supported:
-        return not_available(
-            case_id=case_id,
-            module=Module.OCR,
-            reason_code=UNSUPPORTED_DOCUMENT_TYPE,
-            message=reason or "This document type is not supported by extraction.",
-            model_version=model_version,
+        return ExtractionOutcome(
+            envelope=not_available(
+                case_id=case_id,
+                module=Module.OCR,
+                reason_code=UNSUPPORTED_DOCUMENT_TYPE,
+                message=reason or "This document type is not supported by extraction.",
+                model_version=model_version,
+            ),
+            checks=[],
+            fields=[],
         )
 
     detected = bool(response.get("detected"))
@@ -109,19 +187,42 @@ def from_extract_response(
         orientation_corrected=bool(response.get("orientation_corrected")),
     )
 
-    structured: Dict[str, Optional[str]] = response.get("structured_fields") or {}
-    sources: Dict[str, str] = response.get("structured_fields_sources") or {}
-    fields = [
-        OcrField(
-            key=key,
-            # services/extraction leaves a field null when it is absent from this document
-            # type or could not be found. That null is carried through rather
-            # than being replaced with an empty string.
-            value=value,
-            source=_SOURCE_MAP.get(sources.get(key, "not_found"), FieldSource.NOT_FOUND),
-        )
-        for key, value in structured.items()
-    ]
+    # Every source's reading of every field, keyed by field. A null value is
+    # kept: it records that this side was examined and did not yield the field,
+    # which is not the same as the side never having been consulted.
+    readings: Dict[str, List[FieldReading]] = {}
+
+    def collect(origin: FieldOrigin, body: Dict[str, Any]) -> List[str]:
+        structured: Dict[str, Optional[str]] = body.get("structured_fields") or {}
+        sources: Dict[str, str] = body.get("structured_fields_sources") or {}
+        supplied: List[str] = []
+        for key, value in structured.items():
+            source = _SOURCE_MAP.get(sources.get(key, "not_found"), FieldSource.NOT_FOUND)
+            # An MRZ-decoded value is attributed to the MRZ, not to the side it
+            # was photographed on: its authority comes from the checksummed
+            # layout, and the merge ranks sources by that authority.
+            attributed = FieldOrigin.MRZ if source is FieldSource.MRZ else origin
+            readings.setdefault(key, []).append(
+                FieldReading(origin=attributed, value=value, source=source)
+            )
+            if value not in (None, ""):
+                supplied.append(key)
+        return supplied
+
+    front_keys = collect(FieldOrigin.FRONT, response)
+    back_keys = collect(FieldOrigin.BACK, back) if back else []
+
+    machine_codes = _machine_codes(response, DocumentSide.FRONT)
+    if back:
+        machine_codes.extend(_machine_codes(back, DocumentSide.BACK))
+    for code in machine_codes:
+        for key, value in _fields_from_code(code).items():
+            readings.setdefault(key, []).append(
+                FieldReading(origin=FieldOrigin.QR, value=value, source=FieldSource.QR)
+            )
+
+    outcome = merge_fields(document_type, readings, machine_codes=machine_codes)
+    fields = outcome.fields
 
     mrz_lines: List[str] = list(response.get("mrz_lines") or [])
     mrz = MrzPayload(
@@ -136,6 +237,30 @@ def from_extract_response(
         confidence=_mean_confidence(response.get("mrz_line_details") or []),
     )
 
+    sides = [
+        SideEvidence(
+            side=DocumentSide.FRONT,
+            detection=detection,
+            language=response.get("detected_lang_family"),
+            field_keys=sorted(front_keys),
+        )
+    ]
+    if back:
+        sides.append(
+            SideEvidence(
+                side=DocumentSide.BACK,
+                detection=DetectionPayload(
+                    detected=bool(back.get("detected")),
+                    confidence=back.get("detection_confidence"),
+                    box=_normalise_box(back.get("detection_box"), image_size),
+                    correction_mode=back.get("correction_mode"),
+                    orientation_corrected=bool(back.get("orientation_corrected")),
+                ),
+                language=back.get("detected_lang_family"),
+                field_keys=sorted(back_keys),
+            )
+        )
+
     result = OcrResult(
         document_type=document_type,
         fields=fields,
@@ -143,13 +268,15 @@ def from_extract_response(
         detection=detection,
         overall_confidence=_mean_confidence(response.get("field_lines") or []),
         language=response.get("detected_lang_family"),
+        sides=sides,
+        machine_codes=machine_codes,
     )
 
     if not detected:
         # A usable but incomplete result: OCR may still have read something, but
         # every downstream check inherits the uncertainty of an unlocated
         # document, so the officer is told rather than left to infer it.
-        return partial(
+        envelope = partial(
             case_id=case_id,
             module=Module.OCR,
             model_version=model_version,
@@ -165,12 +292,17 @@ def from_extract_response(
                 )
             ],
         )
+        return ExtractionOutcome(envelope=envelope, checks=outcome.checks, fields=fields)
 
-    return success(
-        case_id=case_id,
-        module=Module.OCR,
-        model_version=model_version,
-        result=result.to_dict(),
+    return ExtractionOutcome(
+        envelope=success(
+            case_id=case_id,
+            module=Module.OCR,
+            model_version=model_version,
+            result=result.to_dict(),
+        ),
+        checks=outcome.checks,
+        fields=fields,
     )
 
 

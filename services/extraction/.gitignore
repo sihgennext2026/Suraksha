@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage
+
+# Runtime output (generated per-request, not source)
+api_debug_output/
+qr_barcode_output/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Misc
+*.log
+WORK2_TAMIL_FIX.md

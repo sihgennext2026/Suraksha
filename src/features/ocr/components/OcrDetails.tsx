@@ -111,7 +111,7 @@ export function OcrDetails({ envelope, result, showProvenance = true }: OcrDetai
                   }
                   mono={MONO_KEYS.has(field.key)}
                   stacked
-                  hint={sourceHint(field)}
+                  hint={conflictHint(field) ?? sourceHint(field)}
                   trailing={
                     field.confidence != null ? (
                       <ConfidenceIndicator
@@ -302,16 +302,45 @@ function fieldLabel(key: string): string {
 
 /**
  * Provenance matters to an officer: a value lifted from a checksummed MRZ is
- * more trustworthy than one matched heuristically against a printed label.
+ * more trustworthy than one matched heuristically against a printed label, and
+ * which side it came off decides where to look to confirm it.
+ *
+ * Both axes are reported in one line because they answer one question — how
+ * much to trust this value and where to check it.
  */
 function sourceHint(field: OcrField): string | undefined {
-  return {
+  const how = {
     mrz: 'From the machine-readable zone',
     label_same_line: 'Matched to a printed label',
     label_next_line: 'Matched to a printed label',
     standalone_id: 'Read as a standalone identifier',
+    qr: 'Decoded from a QR code',
+    barcode: 'Decoded from a barcode',
     not_found: undefined,
   }[field.source];
+  if (!how) return undefined;
+
+  // Only worth saying once a second capture exists; on a front-only screening
+  // every field is from the front and the suffix would be noise.
+  const where =
+    field.origin === 'back' ? ' on the back' : field.origin === 'front' ? ' on the front' : '';
+  const suffix = field.agreement === 'AGREED' ? ' · matches the other side' : '';
+  return `${how}${where}${suffix}`;
+}
+
+/**
+ * A disagreement between two readings of one document.
+ *
+ * Shown as both values rather than as a verdict: the officer has the document
+ * and can settle it, and nothing here has grounds to call either reading wrong.
+ */
+function conflictHint(field: OcrField): string | undefined {
+  if (field.agreement !== 'CONFLICT') return undefined;
+  const readings = (field.readings ?? [])
+    .filter((reading) => reading.value)
+    .map((reading) => `${reading.origin}: ${reading.value}`)
+    .join('  ·  ');
+  return readings ? `Sources disagree — ${readings}` : 'Sources disagree';
 }
 
 const styles = StyleSheet.create({

@@ -189,8 +189,19 @@ class SqliteCaseRepository implements CaseRepository {
       );
 
       await db.runAsync('DELETE FROM documents WHERE case_id = ?', [c.id]);
+      // The reverse side is a row of its own rather than a column on the front:
+      // `kind` already distinguishes captures, and a second image column would
+      // have meant a migration for something the schema could already express.
+      const backRecord = c.document?.backImage
+        ? {
+            id: `${c.document.id}-back`,
+            caseId: c.id,
+            image: c.document.backImage,
+          }
+        : null;
       for (const [kind, record] of [
         ['DOCUMENT', c.document],
+        ['DOCUMENT_BACK', backRecord],
         ['PERSON', c.person],
       ] as const) {
         if (!record) continue;
@@ -271,6 +282,7 @@ class SqliteCaseRepository implements CaseRepository {
     ]);
 
     const documentRow = documents.find((entry) => entry.kind === 'DOCUMENT') ?? null;
+    const backRow = documents.find((entry) => entry.kind === 'DOCUMENT_BACK') ?? null;
     const personRow = documents.find((entry) => entry.kind === 'PERSON') ?? null;
 
     return {
@@ -290,6 +302,16 @@ class SqliteCaseRepository implements CaseRepository {
               source: documentRow.capture_source as 'CAMERA' | 'IMPORTED',
               capturedAt: documentRow.captured_at,
             },
+            backImage: backRow
+              ? {
+                  uri: backRow.image_uri,
+                  width: backRow.image_width,
+                  height: backRow.image_height,
+                  sizeBytes: backRow.image_bytes,
+                  source: backRow.capture_source as 'CAMERA' | 'IMPORTED',
+                  capturedAt: backRow.captured_at,
+                }
+              : null,
           }
         : null,
       person: personRow

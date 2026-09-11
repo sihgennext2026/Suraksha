@@ -1,0 +1,23 @@
+{
+  "detected": true,
+  "detection_confidence": 0.92,
+  "detection_box": [70, 90, 720, 880],
+  "correction_mode": "cv_contour_warp",
+  "lines": [
+    {"text": "WORK PERMIT", "confidence": 0.97},
+    {"text": "Permit Number", "confidence": 0.95},
+    {"text": "WP-2024-98765", "confidence": 0.98},
+    {"text": "Permit Type", "confidence": 0.94},
+    {"text": "Employment", "confidence": 0.96},
+    {"text": "Name:", "confidence": 0.95},
+    {"text": "JOHN SMITH", "confidence": 0.97},
+    {"text": "Nationality", "confidence": 0.94},
+    {"text": "UNITED KINGDOM", "confidence": 0.95},
+    {"text": "Date of Issue: 01-03-2024", "confidence": 0.93},
+    {"text": "Date of Expiry: 28-02-2026", "confidence": 0.93}
+  ],
+  "full_text": "WORK PERMIT Permit Number WP-2024-98765 Permit Type Employment Name: JOHN SMITH Nationality UNITED KINGDOM Date of Issue: 01-03-2024 Date of Expiry: 28-02-2026",
+  "average_confidence": 0.95,
+  "timings_ms": {"detection_ms": 190, "correction_ms": 11, "ocr_ms": 850, "total_ms": 1051},
+  "message": null
+}
